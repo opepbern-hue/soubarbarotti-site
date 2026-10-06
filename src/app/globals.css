@@ -1,0 +1,446 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   Paleta @soubarbarotti (fonte: paleta-soubarbarotti.md)
+   ------------------------------------------------------------------ */
+:root {
+  /* Base - Cinema Black & Clean Neutral */
+  --branco-tela: #ffffff;
+  --nevoa: #f9f9fb;
+  --carvao: #0d0d10;
+  --fumaca: #71717a;
+  --linha: #e4e4e7;
+
+  /* Acentos Cinema (Preto & Grafite em vez de Laranja) */
+  --ambar: #27272a;
+  --laranja-barbarotti: #18181b;
+  --brasa: #09090b;
+
+  /* Azul Céu */
+  --azul-ceu: #2b80e4;
+  --azul-ceu-light: #5da3f2;
+  --azul-ceu-glow: rgba(43, 128, 228, 0.35);
+
+  /* Gradientes & Texturas (Cinema Black & Neutral) */
+  --grad-golden-hour: linear-gradient(135deg, #27272a 0%, #18181b 50%, #09090b 100%);
+  --grad-amanhecer: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
+  --grad-light-leak: radial-gradient(
+    ellipse 75% 100% at 85% 0%,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 45%,
+    rgba(0, 0, 0, 0) 100%
+  );
+
+  --header-h: 64px;
+}
+
+/* Tokens do Tailwind lidos das variáveis acima (bg-nevoa, text-brasa, border-linha…) */
+@theme inline {
+  --color-branco-tela: var(--branco-tela);
+  --color-nevoa: var(--nevoa);
+  --color-carvao: var(--carvao);
+  --color-fumaca: var(--fumaca);
+  --color-linha: var(--linha);
+  --color-ambar: var(--ambar);
+  --color-laranja: var(--laranja-barbarotti);
+  --color-brasa: var(--brasa);
+  --color-azul-ceu: var(--azul-ceu);
+  --color-azul-ceu-light: var(--azul-ceu-light);
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+
+  /* Os três tamanhos do Rushes: celular < 810 ≤ tablet < 1200 ≤ desktop */
+  --breakpoint-md: 50.625rem;
+  --breakpoint-lg: 75rem;
+}
+
+@utility bg-golden-hour {
+  background-image: var(--grad-golden-hour);
+}
+@utility bg-amanhecer {
+  background-image: var(--grad-amanhecer);
+}
+/* O Light Leak vai sempre por cima do branco */
+@utility bg-light-leak {
+  background: var(--grad-light-leak), var(--branco-tela);
+}
+
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--header-h);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--branco-tela);
+    color: var(--carvao);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: #18181b;
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid #52525b;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-video :focus-visible,
+  .on-video:focus-visible {
+    outline-color: #fff;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Ocultar o selo/indicador dev do Next.js (overlay "N") */
+[data-nextjs-toast],
+[data-nextjs-toast-wrapper],
+nextjs-portal,
+#next-devtools,
+[data-nextjs-dialog-overlay],
+button[aria-label*="Next.js"],
+button[aria-label*="Turbopack"],
+div[class*="dev-tools"],
+div[class*="dev-indicator"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Ponto do REC (Vermelho de gravação de câmera) */
+.rec-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  flex: none;
+  animation: rec-blink 1.6s steps(1, end) infinite;
+}
+.rec-blink {
+  animation: rec-blink 1.6s steps(1, end) infinite;
+}
+@keyframes rec-blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+/* Animação ambiente suave dentro e atrás do menu suspenso */
+@keyframes ambient-pulse-move {
+  0% {
+    transform: translate(-10%, -10%) scale(1) rotate(0deg);
+    opacity: 0.35;
+  }
+  33% {
+    transform: translate(20%, 15%) scale(1.2) rotate(120deg);
+    opacity: 0.55;
+  }
+  66% {
+    transform: translate(-8%, 20%) scale(0.9) rotate(240deg);
+    opacity: 0.40;
+  }
+  100% {
+    transform: translate(-10%, -10%) scale(1) rotate(360deg);
+    opacity: 0.35;
+  }
+}
+
+.animate-ambient-move {
+  animation: ambient-pulse-move 14s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-glow-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    filter: blur(24px);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(36px);
+  }
+}
+
+
+.animate-glow-pulse {
+  animation: ambient-glow-pulse 6s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------
+   Animações de Texto estilo Rushes (Framer Motion Text Reveal)
+   ------------------------------------------------------------------ */
+.mask-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: inherit;
+}
+
+.reveal-text {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(115%);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.reveal-text.is-revealed,
+.is-revealed .reveal-text,
+.is-revealed.reveal-text {
+  opacity: 1;
+  transform: translateY(0%);
+}
+
+/* ------------------------------------------------------------------
+   Animação de Revelação de Bloco / Card (Slide Up + Blur)
+   ------------------------------------------------------------------ */
+.reveal-box,
+.reveal-fade-up {
+  opacity: 0;
+  transform: translateY(36px);
+  filter: blur(14px);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--delay, 0ms);
+  will-change: transform, opacity, filter;
+}
+
+.reveal-box.is-revealed,
+.is-revealed .reveal-box,
+.is-revealed.reveal-box,
+.reveal-fade-up.is-revealed,
+.is-revealed .reveal-fade-up,
+.is-revealed.reveal-fade-up {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+/* ------------------------------------------------------------------
+   AnimeJS-Style SplitText (Caractere / Palavra com Blur e Clip)
+   ------------------------------------------------------------------ */
+.split-char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: inherit;
+}
+
+.split-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(115%);
+  filter: blur(12px);
+  will-change: transform, opacity, filter;
+  transition: transform var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1),
+              opacity var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1),
+              filter var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.is-revealed .split-char,
+.split-char.is-revealed {
+  opacity: 1;
+  transform: translateY(0%);
+  filter: blur(0px);
+}
+
+/* Letras que rolam (botão "Fale comigo") */
+.roll {
+  display: inline-flex;
+  white-space: pre;
+}
+.roll-ch {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.3em;
+  line-height: 1.3em;
+  vertical-align: top;
+}
+.roll-ch > span {
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  transition-delay: calc(var(--i) * 22ms);
+}
+@media (hover: hover) {
+  .roll-host:hover .roll-ch > span {
+    transform: translateY(-100%);
+  }
+}
+.roll-host:focus-visible .roll-ch > span,
+.roll-host:active .roll-ch > span {
+  transform: translateY(-100%);
+}
+
+/* Letreiro da faixa de marcas e dos créditos */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+.marquee-host:hover .marquee {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Título gigante: o tamanho da fonte acompanha a largura do bloco (container query),
+   então o nome sempre encosta nas margens, sem passar delas */
+.fit-host {
+  container-type: inline-size;
+}
+.fit-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.86;
+  white-space: nowrap;
+  /* celular: "SOU / BARBAROTTI." → a linha mais longa tem 6,65 em */
+  font-size: calc(100cqw / 6.72);
+}
+@media (min-width: 50.625rem) {
+  .fit-title {
+    /* tablet e desktop: "SOUBARBAROTTI." numa linha → 8,62 em */
+    font-size: calc(100cqw / 8.7);
+  }
+}
+
+/* Marca de conteúdo que falta: fica bem visível até ser preenchido no admin */
+.preencher {
+  background: var(--nevoa);
+  color: var(--brasa);
+  outline: 1px dashed var(--brasa);
+  outline-offset: -1px;
+  border-radius: 3px;
+  padding: 0 0.25em;
+  font-style: normal;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Cantos de visor (HUD de câmera) */
+.viewfinder > i {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-color: rgb(255 255 255 / 0.55);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.viewfinder > i:nth-child(1) {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.viewfinder > i:nth-child(2) {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.viewfinder > i:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+.viewfinder > i:nth-child(4) {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+@media (max-width: 50.6rem) {
+  .viewfinder > i {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Sanfona das perguntas */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details .faq-icon::before,
+details .faq-icon::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 9px;
+  height: 1.25px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s ease;
+}
+details .faq-icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+details[open] .faq-icon::after {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.35s ease,
+    content-visibility 0.35s allow-discrete;
+}
+details[open]::details-content {
+  block-size: auto;
+}
+:root {
+  interpolate-size: allow-keywords;
+}
+
+/* Reduzir movimento: nada de loop, letreiro, contador ou letras animadas */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  .rec-dot,
+  .rec-blink {
+    animation: none;
+  }
+  .marquee {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: center;
+  }
+  .marquee [data-dup] {
+    display: none;
+  }
+}

@@ -1,0 +1,363 @@
+// Banco do site soubarbarotti.com.br
+// Depois de mudar este arquivo: npm run db:push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+// UPLOADING: ainda recebendo partes · PENDING: na fila do worker
+// PROCESSING: comprimindo · READY: pronto para usar · ERROR: falhou (ver `error`)
+enum MediaStatus {
+  UPLOADING
+  PENDING
+  PROCESSING
+  READY
+  ERROR
+}
+
+enum GalleryKind {
+  FRAME
+  BASTIDOR
+}
+
+model Media {
+  id               String      @id @default(cuid())
+  kind             MediaKind
+  status           MediaStatus @default(UPLOADING)
+  originalName     String
+  mimeType         String      @default("")
+  sizeBytes        Float       @default(0)
+  receivedBytes    Float       @default(0)
+  width            Int?
+  height           Int?
+  durationSec      Float?
+  // Segundo do vídeo usado como capa (vazio = o FFmpeg escolhe um frame representativo)
+  posterAtSec      Float?
+  // Trecho usado nas prévias mudas em loop
+  previewStartSec  Float       @default(0)
+  previewLengthSec Float       @default(8)
+  // URLs relativas de cada versão gerada (ver src/lib/media.ts)
+  variants         Json?
+  blurDataUrl      String?
+  alt              String      @default("")
+  isPlaceholder    Boolean     @default(false)
+  tempPath         String?
+  error            String?
+  attempts         Int         @default(0)
+  lockedAt         DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  projectHero      Project[]            @relation("ProjectHero")
+  projectCover     Project[]            @relation("ProjectCover")
+  projectFullVideo Project[]            @relation("ProjectFullVideo")
+  galleryItems     ProjectGalleryItem[] @relation("GalleryMedia")
+  processSteps     ProcessStep[]        @relation("ProcessMedia")
+  testimonials     Testimonial[]        @relation("TestimonialAvatar")
+  brands           Brand[]              @relation("BrandLogo")
+  siteHero         SiteSettings[]       @relation("SiteHero")
+  siteAbout        SiteSettings[]       @relation("SiteAbout")
+  siteOg           SiteSettings[]       @relation("SiteOg")
+  photos           Photo[]              @relation("PhotoMedia")
+
+  @@index([status, createdAt])
+}
+
+model Project {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  title            String
+  category         String  @default("")
+  client           String  @default("")
+  deliverable      String  @default("")
+  location         String  @default("")
+  shortDescription String  @default("")
+  featured         Boolean @default(false)
+  published        Boolean @default(true)
+  order            Int     @default(0)
+
+  heroMediaId      String?
+  heroMedia        Media?  @relation("ProjectHero", fields: [heroMediaId], references: [id], onDelete: SetNull)
+  coverMediaId     String?
+  coverMedia       Media?  @relation("ProjectCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  fullVideoMediaId String?
+  fullVideoMedia   Media?  @relation("ProjectFullVideo", fields: [fullVideoMediaId], references: [id], onDelete: SetNull)
+  // Link do YouTube ou Vimeo (usado quando não há vídeo completo próprio)
+  fullVideoUrl     String  @default("")
+
+  briefTitle       String  @default("")
+  briefText        String  @default("")
+  directionTitle   String  @default("")
+  directionText    String  @default("")
+  productionTitle  String  @default("")
+  productionText   String  @default("")
+  finishingTitle   String  @default("")
+  finishingText    String  @default("")
+
+  seoTitle         String  @default("")
+  seoDescription   String  @default("")
+
+  credits          ProjectCredit[]
+  gallery          ProjectGalleryItem[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model ProjectCredit {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage     String
+  role      String  @default("")
+  tools     String  @default("")
+  order     Int     @default(0)
+}
+
+model ProjectGalleryItem {
+  id        String      @id @default(cuid())
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media       @relation("GalleryMedia", fields: [mediaId], references: [id], onDelete: Cascade)
+  kind      GalleryKind @default(FRAME)
+  caption   String      @default("")
+  order     Int         @default(0)
+}
+
+enum GalleryCollection {
+  FOTO
+  ARTE
+}
+
+// Páginas /fotos e /artes: cada imagem pode ser baixada e copiada pelos visitantes
+model Photo {
+  id           String            @id @default(cuid())
+  mediaId      String
+  media        Media             @relation("PhotoMedia", fields: [mediaId], references: [id], onDelete: Cascade)
+  collection   GalleryCollection @default(FOTO)
+  title        String            @default("")
+  published    Boolean           @default(true)
+  // Mostra os botões Baixar e Copiar
+  downloadable Boolean           @default(true)
+  order        Int               @default(0)
+  createdAt    DateTime          @default(now())
+
+  @@index([collection, published, order])
+}
+
+model ProcessStep {
+  id          String  @id @default(cuid())
+  number      Int     @unique
+  title       String
+  description String  @default("")
+  tools       String  @default("")
+  mediaId     String?
+  media       Media?  @relation("ProcessMedia", fields: [mediaId], references: [id], onDelete: SetNull)
+}
+
+model Plan {
+  id          String  @id @default(cuid())
+  order       Int     @default(0)
+  name        String
+  description String  @default("")
+  price       String  @default("")
+  onRequest   Boolean @default(false)
+  published   Boolean @default(true)
+}
+
+model Testimonial {
+  id            String  @id @default(cuid())
+  quote         String
+  authorName    String
+  authorRole    String  @default("")
+  company       String  @default("")
+  avatarMediaId String?
+  avatarMedia   Media?  @relation("TestimonialAvatar", fields: [avatarMediaId], references: [id], onDelete: SetNull)
+  // Só pode ser publicado com a confirmação de que é real e autorizado
+  confirmed     Boolean @default(false)
+  published     Boolean @default(false)
+  order         Int     @default(0)
+}
+
+model Faq {
+  id        String  @id @default(cuid())
+  question  String
+  answer    String  @default("")
+  published Boolean @default(true)
+  order     Int     @default(0)
+}
+
+model Brand {
+  id          String  @id @default(cuid())
+  name        String
+  logoMediaId String?
+  logoMedia   Media?  @relation("BrandLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  url         String  @default("")
+  published   Boolean @default(true)
+  order       Int     @default(0)
+}
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  readAt    DateTime?
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([archived, createdAt])
+}
+
+model Lead {
+  id               String   @id @default(cuid())
+  nome             String
+  bairro           String?
+  horario          String?
+  email            String?
+  whatsapp         String?
+  instagram        String?
+  siteUrl          String?
+  nicho            String?
+  cidade           String?
+  estado           String?
+  endereco         String?
+  lat              Float?
+  lng              Float?
+  
+  // Dados de CNPJ & Sócios
+  cnpj             String?
+  situacaoCnpj     String?
+  porte            String?
+  dataAbertura     String?
+  nomeSocio        String?
+  
+  // Priorização e Abordagem validada
+  prioridade       Int      @default(1)
+  motivoPrioridade String?
+  primeiraMensagem String?
+  proximoPasso     String?
+  dataContato      DateTime?
+  lembrete48h      Boolean  @default(false)
+  naoVerificado    String?
+
+  // Funil e Origem
+  etapa            String   @default("novo")
+  valor            String?
+  origem           String   @default("mapa")
+  notas            String?
+  contactMessageId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([etapa, createdAt])
+  @@index([cidade, estado])
+  @@index([prioridade])
+  @@index([cnpj])
+}
+
+
+// Uma linha por seção da home: liga/desliga e títulos
+model Section {
+  key        String   @id
+  enabled    Boolean  @default(true)
+  label      String   @default("")
+  titleLine1 String   @default("")
+  titleLine2 String   @default("")
+  intro      String   @default("")
+  updatedAt  DateTime @updatedAt
+}
+
+// Configurações gerais (uma linha só, id = 1)
+model SiteSettings {
+  id                  Int     @id @default(1)
+
+  heroMediaId         String?
+  heroMedia           Media?  @relation("SiteHero", fields: [heroMediaId], references: [id], onDelete: SetNull)
+  heroLocation        String  @default("")
+  heroTagline         String  @default("")
+  heroList            Json    @default("[]")
+
+  // Frase grande: `**trecho**` fica em Brasa; `{{120}}` vira contador
+  numbersUseCounters  Boolean @default(false)
+  numbersPhrase       String  @default("")
+  numbersCounterText  String  @default("")
+
+  aboutMediaId        String?
+  aboutMedia          Media?  @relation("SiteAbout", fields: [aboutMediaId], references: [id], onDelete: SetNull)
+  aboutTag            String  @default("")
+  aboutName           String  @default("")
+  aboutRole           String  @default("")
+  aboutBio            String  @default("")
+
+  contactEmail        String  @default("")
+  whatsapp            String  @default("")
+  instagramUrl        String  @default("")
+  linkedinUrl         String  @default("")
+  youtubeUrl          String  @default("")
+
+  footerLine1         String  @default("")
+  footerLine2         String  @default("")
+  entityPhrase        String  @default("")
+
+  ogMediaId           String?
+  ogMedia             Media?  @relation("SiteOg", fields: [ogMediaId], references: [id], onDelete: SetNull)
+  seoTitle            String  @default("")
+  seoDescription      String  @default("")
+
+  privacyUpdatedAt    DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  ipHash    String
+  ok        Boolean
+  createdAt DateTime @default(now())
+
+  @@index([ipHash, createdAt])
+}
+
+model ContactAttempt {
+  id        String   @id @default(cuid())
+  ipHash    String
+  createdAt DateTime @default(now())
+
+  @@index([ipHash, createdAt])
+}
+
+// ---------- Acesso ao admin ----------
+
+// Senha trocada pelo painel (se não existir, vale a ADMIN_PASSWORD_HASH do .env)
+model AdminAccount {
+  id           Int      @id @default(1)
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+}
+
+// Uma linha por login. O cookie só funciona enquanto a sessão existir aqui:
+// sair, trocar a senha ou "encerrar outras sessões" derruba o acesso na hora.
+model AdminSession {
+  // sha256 do identificador que vai (assinado) dentro do cookie
+  id         String    @id
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  ipHash     String
+  userAgent  String    @default("")
+
+  @@index([revokedAt, expiresAt])
+}
