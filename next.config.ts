@@ -26,16 +26,16 @@ const nextConfig: NextConfig = {
       // página de projetos do site antigo (link da bio do Instagram)
       { source: '/projeto', destination: '/portfolio', permanent: true },
       { source: '/projeto/:path*', destination: '/portfolio', permanent: true },
-      // painel: os dois endereços levam ao mesmo lugar
-      { source: '/dashboard', destination: '/admin', permanent: false },
-      { source: '/dashboard/:path*', destination: '/admin/:path*', permanent: false },
+      // Redireciona qualquer tentativa de acesso ao admin para a home
+      { source: '/admin', destination: '/', permanent: false },
+      { source: '/admin/:path*', destination: '/', permanent: false },
+      { source: '/dashboard', destination: '/', permanent: false },
+      { source: '/dashboard/:path*', destination: '/', permanent: false },
     ];
   },
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
-      { source: '/admin', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },
-      { source: '/admin/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },
     ];
   },
 };

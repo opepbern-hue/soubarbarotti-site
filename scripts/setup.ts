@@ -4,28 +4,18 @@ import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { hashPassword } from '../src/lib/password';
 import { LOCAL_DATABASE_URL, startLocalDb } from './db-local';
 import { ENV_PATH, readEnvFile } from './env-file';
 import { loadEnv } from './load-env';
 
-async function ensureEnv(): Promise<string | null> {
+async function ensureEnv(): Promise<void> {
   const current = readEnvFile();
-  if (current.SESSION_SECRET && current.ADMIN_PASSWORD_HASH) return null;
+  if (current.SESSION_SECRET) return;
 
-  let generatedPassword: string | null = null;
-  let hash = current.ADMIN_PASSWORD_HASH;
-  if (!hash) {
-    // Reaproveita a senha da versão anterior do projeto, se existir
-    const legacy = current.ADMIN_PASSWORD || readEnvFile(path.resolve('_versao-anterior/.env')).ADMIN_PASSWORD;
-    const password = legacy || (generatedPassword = randomBytes(9).toString('base64url'));
-    hash = await hashPassword(password);
-  }
   const keep = (k: string, fallback: string) => current[k] || fallback;
   const dbUrl = current.DATABASE_URL?.startsWith('postgres') ? current.DATABASE_URL : LOCAL_DATABASE_URL;
 
   const content = `# Configuração do site soubarbarotti.com.br
-# Não compartilhe este arquivo: ele tem as chaves do admin.
 
 # Banco de dados. No computador, o Postgres embutido liga sozinho com "npm run dev" (LOCAL_DB=1).
 DATABASE_URL="${dbUrl}"
@@ -34,9 +24,8 @@ LOCAL_DB=${keep('LOCAL_DB', '1')}
 # Endereço público do site (em produção: https://soubarbarotti.com.br)
 SITE_URL=${keep('SITE_URL', 'http://localhost:3000')}
 
-# Segurança do admin. Para trocar a senha: npm run senha -- "nova senha"
+# Chave interna de sessão
 SESSION_SECRET=${keep('SESSION_SECRET', randomBytes(48).toString('base64url'))}
-ADMIN_PASSWORD_HASH=${hash}
 
 # Mídia: "local" guarda no disco (pasta STORAGE_DIR); "r2" usa o Cloudflare R2
 STORAGE_DRIVER=${keep('STORAGE_DRIVER', 'local')}
@@ -56,7 +45,6 @@ CALLMEBOT_APIKEY=${keep('CALLMEBOT_APIKEY', '')}
 `;
   fs.writeFileSync(ENV_PATH, content, 'utf8');
   console.log('[setup] arquivo .env criado.');
-  return generatedPassword;
 }
 
 function prisma(args: string[]) {
@@ -66,7 +54,7 @@ function prisma(args: string[]) {
 }
 
 async function main() {
-  const generatedPassword = await ensureEnv();
+  await ensureEnv();
   loadEnv();
 
   const db = process.env.LOCAL_DB === '1' ? await startLocalDb() : null;
@@ -80,7 +68,7 @@ async function main() {
     const { seed } = await import('../prisma/seed');
     await seed(client);
 
-    console.log('[setup] comprimindo as mídias provisórias (leva alguns minutos na primeira vez)…');
+    console.log('[setup] comprimindo as mídias provisórias…');
     const { drainQueue } = await import('./worker');
     await drainQueue();
     await client.$disconnect();
@@ -89,13 +77,6 @@ async function main() {
   }
 
   console.log('\n[setup] pronto! Agora rode:  npm run dev  e abra http://localhost:3000');
-  console.log('        Admin: http://localhost:3000/admin');
-  if (generatedPassword) {
-    console.log(`\n        Senha do admin (anote, ela não aparece de novo): ${generatedPassword}`);
-    console.log('        Para trocar: npm run senha -- "nova senha"');
-  } else {
-    console.log('        A senha do admin é a mesma que já estava no seu .env.');
-  }
 }
 
 main().catch((e) => {

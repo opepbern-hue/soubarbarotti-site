@@ -62,9 +62,10 @@ export function AmbientSoundWidget() {
     // Alvo: links do menu de navegação, CTA "Fale comigo", botões de envio
     let lastSfx = 0;
     const handleMainButtonHover = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement)?.closest(
-        'header nav a, .roll-host, button[type="submit"], #menu-celular a',
-      );
+      const target =
+        e.target instanceof Element
+          ? e.target.closest('header nav a, .roll-host, button[type="submit"], #menu-celular a')
+          : null;
       const now = performance.now();
       if (target && now - lastSfx > 350) {
         lastSfx = now;

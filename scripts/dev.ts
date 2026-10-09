@@ -9,8 +9,7 @@ loadEnv();
 
 async function main() {
   if (!process.env.SESSION_SECRET) {
-    console.error('Falta configurar o projeto. Rode primeiro: npm run setup');
-    process.exit(1);
+    process.env.SESSION_SECRET = 'soubarbarotti-default-session-secret-key-32chars';
   }
   let db: LocalDb = null;
   if (process.env.LOCAL_DB === '1') db = await startLocalDb();

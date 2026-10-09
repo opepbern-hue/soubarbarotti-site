@@ -5,8 +5,7 @@ import { env } from './env';
 export async function notifyNewMessage(total: number): Promise<void> {
   const phone = env.whatsappNotifyPhone;
   const apikey = env.callmebotApiKey;
-  if (!phone || !apikey) return;
-  const text = `soubarbarotti.com.br: mensagem nova no formulário de contato (${total} sem ler). Leia em ${env.siteUrl}/admin/mensagens`;
+  const text = `soubarbarotti.com.br: nova mensagem no formulário de contato (${total} sem ler).`;
   const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(apikey)}`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });

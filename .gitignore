@@ -7,6 +7,7 @@ next-env.d.ts
 # segredos
 .env
 .env.local
+.neon
 
 # dados locais: banco embutido, mídia enviada e arquivos temporários
 .data/

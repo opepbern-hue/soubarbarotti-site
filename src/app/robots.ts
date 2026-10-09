@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { env } from '@/lib/env';
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ['/admin', '/api/'];
+  const disallow = ['/api/'];
   return {
     rules: [
       { userAgent: '*', allow: '/', disallow },

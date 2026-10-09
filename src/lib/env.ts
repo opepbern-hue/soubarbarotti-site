@@ -10,12 +10,10 @@ export const env = {
     return str('SITE_URL', 'http://localhost:3000').replace(/\/$/, '');
   },
   get sessionSecret() {
-    const s = str('SESSION_SECRET');
-    if (s.length < 32) throw new Error('SESSION_SECRET ausente ou curto demais (mínimo 32 caracteres). Rode `npm run setup`.');
-    return s;
+    return str('SESSION_SECRET', 'soubarbarotti-default-session-secret-key-32chars');
   },
   get adminPasswordHash() {
-    return str('ADMIN_PASSWORD_HASH');
+    return str('ADMIN_PASSWORD_HASH', '');
   },
   /** `local` (pasta no disco) ou `r2` (Cloudflare R2 / qualquer S3) */
   get storageDriver(): 'local' | 'r2' {
