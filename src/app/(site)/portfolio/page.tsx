@@ -30,8 +30,8 @@ export default async function PortfolioPage() {
             {projects.length ? (
               <PortfolioGrid projects={projects} />
             ) : (
-              <p className="text-fumaca">
-                <mark className="preencher">[PREENCHER: cadastre os projetos no admin]</mark>
+              <p className="text-fumaca text-sm">
+                Nenhum projeto publicado no momento. Em breve novos trabalhos estarão disponíveis.
               </p>
             )}
           </div>
