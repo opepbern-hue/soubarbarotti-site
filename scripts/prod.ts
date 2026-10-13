@@ -14,12 +14,13 @@ import { loadEnv } from './load-env';
 loadEnv();
 
 async function checkDatabaseConnection(maxAttempts = 15, delayMs = 2000): Promise<boolean> {
-  const defaultNeon = 'postgresql://neondb_owner:npg_wBtbuUG0MXK7@ep-patient-grass-b4czxdis-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
+  const defaultSupabase =
+    'postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
   let dbUrl = process.env.DATABASE_URL || '';
   if (!dbUrl || dbUrl.includes('usuario:senha@host') || dbUrl.includes('nomedobanco')) {
-    console.warn('[prod] Usando banco de dados Neon padrão de produção...');
-    process.env.DATABASE_URL = defaultNeon;
-    dbUrl = defaultNeon;
+    console.warn('[prod] Usando banco de dados Supabase padrão de produção...');
+    process.env.DATABASE_URL = defaultSupabase;
+    dbUrl = defaultSupabase;
   }
 
   const { PrismaClient } = await import('@prisma/client');

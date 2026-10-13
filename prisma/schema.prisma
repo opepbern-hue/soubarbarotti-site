@@ -361,3 +361,68 @@ model AdminSession {
 
   @@index([revokedAt, expiresAt])
 }
+
+// Tabelas existentes do Supabase (protegidas contra remoção)
+model LegacyAdminAuth {
+  id           Int       @id @default(autoincrement())
+  username     String
+  passwordHash String    @map("password_hash")
+  role         String
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime? @map("created_at")
+
+  @@map("admin_auth")
+}
+
+model LegacyPedidoOrcamento {
+  id              BigInt    @id @default(autoincrement())
+  numero          String
+  clienteNome     String    @map("cliente_nome")
+  clienteEmail    String?   @map("cliente_email")
+  clienteTelefone String?   @map("cliente_telefone")
+  empresaSetor    String?   @map("empresa_setor")
+  servicos        String[]
+  mensagem        String
+  status          String?
+  score           Int?
+  idioma          String?
+  origem          String?
+  prazo           String?
+  reuniaoInfo     String?   @map("reuniao_info")
+  observacoes     String?
+  createdAt       DateTime? @map("created_at")
+  updatedAt       DateTime? @map("updated_at")
+
+  @@map("pedidos_orcamento")
+}
+
+model LegacyPortfolioVideo {
+  id        String   @id
+  filename  String
+  url       String?
+  aspect    String?
+  w         Int?
+  h         Int?
+  duration  Decimal? @db.Decimal
+  size      BigInt?
+  placement String
+  position  Int
+  title     String
+  label     String?
+  tags      String?
+  alt       String?
+  active    Boolean
+  hero      Boolean
+  rights    String
+  note      String?
+  poster    String?
+  service   String?
+  sector    String?
+  meta      String?
+  ai        Boolean?
+  i18n      Json
+  updatedAt DateTime @map("updated_at")
+
+  @@map("portfolio_videos")
+}
+

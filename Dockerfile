@@ -18,7 +18,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-ENV DATABASE_URL="postgresql://neondb_owner:npg_wBtbuUG0MXK7@ep-patient-grass-b4czxdis-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require"
+ENV DATABASE_URL="postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
 ENV STORAGE_DRIVER=local
 ENV STORAGE_DIR="./storage"
 ENV MEDIA_BASE_URL="/media"
