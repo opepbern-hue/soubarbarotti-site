@@ -22,8 +22,6 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
   const [settings, items] = await Promise.all([getSettings(), navItems()]);
   return (
     <>
-      <Preloader />
-      <AmbientSoundWidget />
       <JsonLd data={globalJsonLd(settings)} />
       <Header items={items} ctaLabel="Fale comigo" />
       <main id="conteudo" tabIndex={-1} className="outline-none">

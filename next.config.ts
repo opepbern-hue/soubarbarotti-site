@@ -26,11 +26,6 @@ const nextConfig: NextConfig = {
       // página de projetos do site antigo (link da bio do Instagram)
       { source: '/projeto', destination: '/portfolio', permanent: true },
       { source: '/projeto/:path*', destination: '/portfolio', permanent: true },
-      // Redireciona qualquer tentativa de acesso ao admin para a home
-      { source: '/admin', destination: '/', permanent: false },
-      { source: '/admin/:path*', destination: '/', permanent: false },
-      { source: '/dashboard', destination: '/', permanent: false },
-      { source: '/dashboard/:path*', destination: '/', permanent: false },
     ];
   },
   async headers() {

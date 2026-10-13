@@ -23,13 +23,14 @@ export function useCursorFollower(active: boolean, size: number) {
   const dotRef = useRef<HTMLSpanElement>(null);
   const target = useRef({ x: 0, y: 0 });
   const pos = useRef({ x: 0, y: 0 });
+  const rectRef = useRef<{ left: number; top: number; time: number } | null>(null);
 
   useEffect(() => {
     if (!active) return;
     let raf = 0;
     const loop = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.18;
-      pos.current.y += (target.current.y - pos.current.y) * 0.18;
+      pos.current.x += (target.current.x - pos.current.x) * 0.22;
+      pos.current.y += (target.current.y - pos.current.y) * 0.22;
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${pos.current.x - size / 2}px, ${pos.current.y - size / 2}px, 0)`;
       }
@@ -42,7 +43,12 @@ export function useCursorFollower(active: boolean, size: number) {
   const track = (e: PointerEvent, jump: boolean) => {
     const host = hostRef.current;
     if (!host) return;
-    const r = host.getBoundingClientRect();
+    const now = performance.now();
+    if (!rectRef.current || now - rectRef.current.time > 400) {
+      const r = host.getBoundingClientRect();
+      rectRef.current = { left: r.left, top: r.top, time: now };
+    }
+    const r = rectRef.current;
     target.current = { x: e.clientX - r.left, y: e.clientY - r.top };
     if (jump) pos.current = { ...target.current };
   };

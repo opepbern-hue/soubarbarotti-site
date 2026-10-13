@@ -19,7 +19,7 @@ export function Hero({ settings }: { settings: SettingsView }) {
   return (
     <section
       aria-label="Abertura"
-      className="relative isolate flex min-h-[100dvh] h-screen min-h-[750px] lg:min-h-[880px] xl:min-h-[920px] w-full flex-col justify-between overflow-hidden bg-black text-white"
+      className="relative isolate flex min-h-[100dvh] w-full flex-col justify-between overflow-hidden bg-black text-white"
     >
       {/* 1. VÍDEO CINEMATOGRÁFICO DE FUNDO (PORSCHE / HERO MEDIA) */}
       {media ? (

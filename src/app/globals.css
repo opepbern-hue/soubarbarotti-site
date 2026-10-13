@@ -34,6 +34,22 @@
   --header-h: 64px;
 }
 
+.admin-theme {
+  --branco-tela: #131317;
+  --nevoa: #1a1a21;
+  --carvao: #f4f4f7;
+  --fumaca: #a1a1aa;
+  --linha: rgba(255, 255, 255, 0.12);
+  --brasa: #ffffff;
+  --laranja-barbarotti: #ff6a00;
+  --grad-light-leak: radial-gradient(
+    ellipse 75% 100% at 85% 0%,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  color-scheme: dark;
+}
+
 /* Tokens do Tailwind lidos das variáveis acima (bg-nevoa, text-brasa, border-linha…) */
 @theme inline {
   --color-branco-tela: var(--branco-tela);
@@ -208,18 +224,16 @@ div[class*="dev-indicator"] {
 }
 
 /* ------------------------------------------------------------------
-   Animação de Revelação de Bloco / Card (Slide Up + Blur)
+   Animação de Revelação de Bloco / Card (Slide Up Rápido & Suave)
    ------------------------------------------------------------------ */
 .reveal-box,
 .reveal-fade-up {
   opacity: 0;
-  transform: translateY(36px);
-  filter: blur(14px);
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(20px);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.45s ease;
   transition-delay: var(--delay, 0ms);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .reveal-box.is-revealed,
@@ -230,11 +244,10 @@ div[class*="dev-indicator"] {
 .is-revealed.reveal-fade-up {
   opacity: 1;
   transform: translateY(0);
-  filter: blur(0px);
 }
 
 /* ------------------------------------------------------------------
-   AnimeJS-Style SplitText (Caractere / Palavra com Blur e Clip)
+   AnimeJS-Style SplitText (Caractere / Palavra Suave e Leve)
    ------------------------------------------------------------------ */
 .split-char-mask {
   display: inline-block;
@@ -246,12 +259,10 @@ div[class*="dev-indicator"] {
 .split-char {
   display: inline-block;
   opacity: 0;
-  transform: translateY(115%);
-  filter: blur(12px);
-  will-change: transform, opacity, filter;
-  transition: transform var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1),
-              opacity var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1),
-              filter var(--duration, 0.75s) cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(100%);
+  will-change: transform, opacity;
+  transition: transform var(--duration, 0.5s) cubic-bezier(0.16, 1, 0.3, 1),
+              opacity var(--duration, 0.4s) ease;
   transition-delay: var(--delay, 0ms);
 }
 
@@ -259,7 +270,6 @@ div[class*="dev-indicator"] {
 .split-char.is-revealed {
   opacity: 1;
   transform: translateY(0%);
-  filter: blur(0px);
 }
 
 /* Letras que rolam (botão "Fale comigo") */
