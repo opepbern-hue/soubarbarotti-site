@@ -29,15 +29,49 @@ export function localPathFor(key: string): string {
   return full;
 }
 
+const SUPABASE_STORAGE_BASE = 'https://xvabghgvrhpnyywpmodb.supabase.co';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2YWJnaGd2cmhwbnl5d3Btb2RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NTgwNTEsImV4cCI6MjEwNzMzNDA1MX0.d0CNiaTYEnpsCY4N9qS6HNIxa3u7DYtzAOErvZHzC0w';
+
+async function syncToSupabase(key: string, filePath: string, contentType: string): Promise<void> {
+  try {
+    const buffer = await fsp.readFile(filePath);
+    await fetch(`${SUPABASE_STORAGE_BASE}/storage/v1/object/media/${safeKey(key)}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': contentType || 'application/octet-stream',
+        'x-upsert': 'true',
+      },
+      body: buffer,
+    });
+  } catch (e) {
+    console.warn('[storage] Aviso ao espelhar no Supabase:', e);
+  }
+}
+
 const localDriver: StorageDriver = {
-  async put(key, filePath) {
+  async put(key, filePath, contentType) {
     const dest = localPathFor(key);
     await fsp.mkdir(path.dirname(dest), { recursive: true });
     await fsp.copyFile(filePath, dest);
+    // Espelha no Supabase em segundo plano
+    syncToSupabase(key, filePath, contentType).catch(() => {});
   },
   async download(key, destPath) {
+    const local = localPathFor(key);
+    if (fs.existsSync(local)) {
+      await fsp.mkdir(path.dirname(destPath), { recursive: true });
+      await fsp.copyFile(local, destPath);
+      return;
+    }
+    // Baixa do Supabase se não estiver no disco
+    const res = await fetch(`${SUPABASE_STORAGE_BASE}/storage/v1/object/public/media/${safeKey(key)}`);
+    if (!res.ok) throw new Error(`Arquivo não encontrado no Supabase: ${key}`);
     await fsp.mkdir(path.dirname(destPath), { recursive: true });
-    await fsp.copyFile(localPathFor(key), destPath);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    await fsp.writeFile(destPath, buffer);
   },
   async deletePrefix(prefix) {
     await fsp.rm(localPathFor(prefix), { recursive: true, force: true });
@@ -45,9 +79,14 @@ const localDriver: StorageDriver = {
   async read(key) {
     const file = localPathFor(key);
     const stat = await fsp.stat(file).catch(() => null);
-    if (!stat?.isFile()) return null;
-    const { Readable } = await import('node:stream');
-    return { stream: Readable.toWeb(fs.createReadStream(file)) as ReadableStream, size: stat.size };
+    if (stat?.isFile()) {
+      const { Readable } = await import('node:stream');
+      return { stream: Readable.toWeb(fs.createReadStream(file)) as ReadableStream, size: stat.size };
+    }
+    // Se não estiver local, lê do Supabase
+    const res = await fetch(`${SUPABASE_STORAGE_BASE}/storage/v1/object/public/media/${safeKey(key)}`);
+    if (!res.ok || !res.body) return null;
+    return { stream: res.body as ReadableStream, size: Number(res.headers.get('content-length')) || null };
   },
 };
 
