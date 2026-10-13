@@ -18,6 +18,10 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+ENV DATABASE_URL="postgresql://neondb_owner:npg_wBtbuUG0MXK7@ep-patient-grass-b4czxdis-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require"
+ENV STORAGE_DRIVER=local
+ENV STORAGE_DIR="./storage"
+ENV MEDIA_BASE_URL="/media"
 
 # 1. Copia manifesto de pacotes e instala dependências necessárias para o build
 COPY package.json package-lock.json ./

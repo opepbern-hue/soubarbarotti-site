@@ -14,23 +14,12 @@ import { loadEnv } from './load-env';
 loadEnv();
 
 async function checkDatabaseConnection(maxAttempts = 15, delayMs = 2000): Promise<boolean> {
-  const dbUrl = process.env.DATABASE_URL || '';
-  if (!dbUrl) {
-    console.error('\n❌ ERRO: DATABASE_URL não definida nas variáveis de ambiente.\n');
-    return false;
-  }
-
-  if (dbUrl.includes('usuario:senha@host') || dbUrl.includes('nomedobanco')) {
-    console.error('\n=============================================================');
-    console.error('❌ ERRO CRÍTICO NO DOKPLOY:');
-    console.error('A variável DATABASE_URL está com valores de exemplo (placeholder):');
-    console.error(`"${dbUrl}"`);
-    console.error('No Dokploy:');
-    console.error('1. Crie um banco de dados PostgreSQL (Create Service -> Database -> Postgres).');
-    console.error('2. Copie a "Internal Connection String" gerada pelo Dokploy.');
-    console.error('3. Cole na aba Environment da sua aplicação como DATABASE_URL.');
-    console.error('=============================================================\n');
-    return false;
+  const defaultNeon = 'postgresql://neondb_owner:npg_wBtbuUG0MXK7@ep-patient-grass-b4czxdis-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
+  let dbUrl = process.env.DATABASE_URL || '';
+  if (!dbUrl || dbUrl.includes('usuario:senha@host') || dbUrl.includes('nomedobanco')) {
+    console.warn('[prod] Usando banco de dados Neon padrão de produção...');
+    process.env.DATABASE_URL = defaultNeon;
+    dbUrl = defaultNeon;
   }
 
   const { PrismaClient } = await import('@prisma/client');

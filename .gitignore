@@ -9,9 +9,8 @@ next-env.d.ts
 .env.local
 .neon
 
-# dados locais: banco embutido, mídia enviada e arquivos temporários
+# dados locais: banco embutido e arquivos temporários
 .data/
-storage/
 *.db
 *.db-journal
 
