@@ -17,14 +17,20 @@ async function checkDatabaseConnection(maxAttempts = 15, delayMs = 2000): Promis
   const defaultSupabase =
     'postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
   let dbUrl = process.env.DATABASE_URL || '';
-  if (!dbUrl || dbUrl.includes('usuario:senha@host') || dbUrl.includes('nomedobanco')) {
+  if (
+    !dbUrl ||
+    dbUrl.includes('@host') ||
+    dbUrl.includes('host:5432') ||
+    dbUrl.includes('nomedobanco') ||
+    dbUrl.includes('usuario:senha')
+  ) {
     console.warn('[prod] Usando banco de dados Supabase padrão de produção...');
     process.env.DATABASE_URL = defaultSupabase;
     dbUrl = defaultSupabase;
   }
 
   const { PrismaClient } = await import('@prisma/client');
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ datasources: { db: { url: dbUrl } } });
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -92,7 +98,7 @@ async function main() {
           console.log('[prod] ✅ Tabelas do PostgreSQL sincronizadas com sucesso!');
           try {
             const { PrismaClient } = await import('@prisma/client');
-            const prisma = new PrismaClient();
+            const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
             const hasSettings = await prisma.siteSettings.findUnique({ where: { id: 1 } });
             if (!hasSettings) {
               console.log('[prod] Banco novo detectado: inserindo conteúdo inicial (seed)...');
