@@ -107,11 +107,11 @@ export const DEFAULT_SETTINGS: SettingsView = {
 export const DEFAULT_SECTIONS: Record<string, SectionView> = {
   marcas: { key: 'marcas', enabled: true, label: '', titleLine1: '', titleLine2: '', intro: '' },
   numeros: { key: 'numeros', enabled: true, label: '', titleLine1: '', titleLine2: '', intro: '' },
-  trabalhos: { key: 'trabalhos', enabled: true, label: 'REC: Trabalhos', titleLine1: '', titleLine2: '', intro: '' },
+  trabalhos: { key: 'trabalhos', enabled: true, label: 'Trabalhos', titleLine1: '', titleLine2: '', intro: '' },
   processo: {
     key: 'processo',
     enabled: true,
-    label: 'REC: Processo',
+    label: 'Processo',
     titleLine1: 'do roteiro',
     titleLine2: 'ao color grade',
     intro: 'Cinco etapas, cada uma com a sua ferramenta. Nenhuma cena é gerada antes de estar planejada.',
@@ -119,7 +119,7 @@ export const DEFAULT_SECTIONS: Record<string, SectionView> = {
   sobre: {
     key: 'sobre',
     enabled: true,
-    label: 'REC: Sobre',
+    label: 'Sobre',
     titleLine1: 'quem dirige',
     titleLine2: 'cada cena',
     intro: 'Uma pessoa só, do roteiro à entrega.',
@@ -127,26 +127,26 @@ export const DEFAULT_SECTIONS: Record<string, SectionView> = {
   planos: {
     key: 'planos',
     enabled: true,
-    label: 'REC: Planos',
+    label: 'Planos',
     titleLine1: 'três formas',
     titleLine2: 'de trabalhar comigo',
     intro: 'Escolha o formato mais perto do seu projeto. Se nenhum servir, a gente monta um sob medida.',
   },
-  depoimentos: { key: 'depoimentos', enabled: true, label: 'REC: Depoimentos', titleLine1: 'quem já', titleLine2: 'trabalhou comigo', intro: '' },
+  depoimentos: { key: 'depoimentos', enabled: true, label: 'Depoimentos', titleLine1: 'quem já', titleLine2: 'trabalhou comigo', intro: '' },
   perguntas: {
     key: 'perguntas',
     enabled: true,
-    label: 'REC: Perguntas',
+    label: 'Perguntas',
     titleLine1: 'o que perguntam',
     titleLine2: 'antes de fechar',
     intro: 'As dúvidas que aparecem antes de todo projeto.',
   },
-  contato: { key: 'contato', enabled: true, label: 'REC: Contato', titleLine1: 'me conta', titleLine2: 'a sua ideia', intro: '' },
-  pagina_trabalhos: { key: 'pagina_trabalhos', enabled: true, label: 'REC: Portfólio', titleLine1: 'os filmes', titleLine2: 'que eu dirigi', intro: '' },
+  contato: { key: 'contato', enabled: true, label: 'Contato', titleLine1: 'me conta', titleLine2: 'a sua ideia', intro: '' },
+  pagina_trabalhos: { key: 'pagina_trabalhos', enabled: true, label: 'Portfólio', titleLine1: 'os filmes', titleLine2: 'que eu dirigi', intro: '' },
   pagina_fotos: {
     key: 'pagina_fotos',
     enabled: true,
-    label: 'REC: Fotos',
+    label: 'Fotos',
     titleLine1: 'as fotos',
     titleLine2: 'pode baixar',
     intro: 'Baixe em alta ou copie e cole direto onde quiser.',
@@ -154,7 +154,7 @@ export const DEFAULT_SECTIONS: Record<string, SectionView> = {
   pagina_artes: {
     key: 'pagina_artes',
     enabled: true,
-    label: 'REC: Artes',
+    label: 'Artes',
     titleLine1: 'as artes',
     titleLine2: 'pode baixar',
     intro: 'Baixe em alta ou copie e cole direto onde quiser.',
@@ -205,25 +205,25 @@ export const getSettings = unstable_cache(
       if (!s) return DEFAULT_SETTINGS;
       return {
         heroMedia: toMediaView(s.heroMedia),
-        heroLocation: s.heroLocation || DEFAULT_SETTINGS.heroLocation,
-        heroTagline: s.heroTagline || DEFAULT_SETTINGS.heroTagline,
-        heroList: Array.isArray(s.heroList) && s.heroList.length > 0 ? (s.heroList as string[]) : DEFAULT_SETTINGS.heroList,
+        heroLocation: s.heroLocation.replace(/^●?\s*REC:\s*/i, ''),
+        heroTagline: s.heroTagline,
+        heroList: Array.isArray(s.heroList) ? (s.heroList as string[]) : DEFAULT_SETTINGS.heroList,
         numbersUseCounters: s.numbersUseCounters,
-        numbersPhrase: s.numbersPhrase || DEFAULT_SETTINGS.numbersPhrase,
-        numbersCounterText: s.numbersCounterText || DEFAULT_SETTINGS.numbersCounterText,
+        numbersPhrase: s.numbersPhrase,
+        numbersCounterText: s.numbersCounterText,
         aboutMedia: toMediaView(s.aboutMedia),
-        aboutTag: s.aboutTag || DEFAULT_SETTINGS.aboutTag,
-        aboutName: s.aboutName || DEFAULT_SETTINGS.aboutName,
-        aboutRole: s.aboutRole || DEFAULT_SETTINGS.aboutRole,
-        aboutBio: s.aboutBio || DEFAULT_SETTINGS.aboutBio,
-        contactEmail: s.contactEmail || DEFAULT_SETTINGS.contactEmail,
-        whatsapp: s.whatsapp || DEFAULT_SETTINGS.whatsapp,
-        instagramUrl: s.instagramUrl || DEFAULT_SETTINGS.instagramUrl,
+        aboutTag: s.aboutTag,
+        aboutName: s.aboutName,
+        aboutRole: s.aboutRole,
+        aboutBio: s.aboutBio,
+        contactEmail: s.contactEmail,
+        whatsapp: s.whatsapp,
+        instagramUrl: s.instagramUrl,
         linkedinUrl: s.linkedinUrl,
         youtubeUrl: s.youtubeUrl,
-        footerLine1: s.footerLine1 || DEFAULT_SETTINGS.footerLine1,
-        footerLine2: s.footerLine2 || DEFAULT_SETTINGS.footerLine2,
-        entityPhrase: s.entityPhrase || DEFAULT_SETTINGS.entityPhrase,
+        footerLine1: s.footerLine1,
+        footerLine2: s.footerLine2,
+        entityPhrase: s.entityPhrase,
         ogMedia: toMediaView(s.ogMedia),
         seoTitle: s.seoTitle || DEFAULT_SETTINGS.seoTitle,
         seoDescription: s.seoDescription || DEFAULT_SETTINGS.seoDescription,
@@ -248,10 +248,10 @@ export const getSections = unstable_cache(
         map[r.key] = {
           key: r.key,
           enabled: r.enabled,
-          label: r.label || map[r.key]?.label || '',
-          titleLine1: r.titleLine1 || map[r.key]?.titleLine1 || '',
-          titleLine2: r.titleLine2 || map[r.key]?.titleLine2 || '',
-          intro: r.intro || map[r.key]?.intro || '',
+          label: r.label.replace(/^●?\s*REC:\s*/i, ''),
+          titleLine1: r.titleLine1,
+          titleLine2: r.titleLine2,
+          intro: r.intro,
         };
       }
       return map;
@@ -380,7 +380,6 @@ export const getBrands = unstable_cache(
         orderBy: { order: 'asc' },
         include: { logoMedia: { select: mediaSelect } },
       });
-      if (!rows || rows.length === 0) return DEFAULT_BRANDS;
       return rows.map((b) => ({ id: b.id, name: b.name, url: b.url, logo: toMediaView(b.logoMedia) }));
     } catch {
       return DEFAULT_BRANDS;
@@ -394,7 +393,6 @@ export const getProcessSteps = unstable_cache(
   async () => {
     try {
       const rows = await prisma.processStep.findMany({ orderBy: { number: 'asc' }, include: { media: { select: mediaSelect } } });
-      if (!rows || rows.length === 0) return DEFAULT_PROCESS_STEPS;
       return rows.map((s) => ({ id: s.id, number: s.number, title: s.title, description: s.description, tools: s.tools, media: toMediaView(s.media) }));
     } catch {
       return DEFAULT_PROCESS_STEPS;
@@ -408,7 +406,6 @@ export const getPlans = unstable_cache(
   async () => {
     try {
       const rows = await prisma.plan.findMany({ where: { published: true }, orderBy: { order: 'asc' } });
-      if (!rows || rows.length === 0) return DEFAULT_PLANS;
       return rows.map((p) => ({ id: p.id, name: p.name, description: p.description, price: p.price, onRequest: p.onRequest }));
     } catch {
       return DEFAULT_PLANS;
@@ -446,7 +443,6 @@ export const getFaqs = unstable_cache(
   async () => {
     try {
       const rows = await prisma.faq.findMany({ where: { published: true }, orderBy: { order: 'asc' } });
-      if (!rows || rows.length === 0) return DEFAULT_FAQS;
       return rows.map((f) => ({ id: f.id, question: f.question, answer: f.answer }));
     } catch {
       return DEFAULT_FAQS;

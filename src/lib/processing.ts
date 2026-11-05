@@ -69,8 +69,14 @@ function longSide(n: number): string {
   );
 }
 
-const x264 = (crf: number, profile = 'high') => [
-  '-c:v', 'libx264', '-preset', PRESET, '-crf', String(crf), '-profile:v', profile,
+/**
+ * H.264 com teto de bitrate: CRF cuida da qualidade, `maxrate` evita picos que
+ * engasgam o vídeo em conexão de celular. GOP de 2 s deixa o avanço/loop rápido.
+ */
+const x264 = (crf: number, { profile = 'high', maxrate, preset = PRESET }: { profile?: string; maxrate: number; preset?: string }) => [
+  '-c:v', 'libx264', '-preset', preset, '-crf', String(crf), '-profile:v', profile,
+  '-maxrate', `${maxrate}k`, '-bufsize', `${maxrate * 2}k`,
+  '-g', '48', '-keyint_min', '24', '-sc_threshold', '40',
   '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-threads', THREADS,
 ];
 
@@ -91,8 +97,8 @@ async function imageSet(
     const base = sharp(src, { failOn: 'none' }).rotate().resize({ width: w, withoutEnlargement: true }).keepXmp();
     const avif = path.join(outDir, `${prefix}-${w}.avif`);
     const webp = path.join(outDir, `${prefix}-${w}.webp`);
-    await base.clone().avif({ quality: 52, effort: 4 }).toFile(avif);
-    await base.clone().webp({ quality: 80 }).toFile(webp);
+    await base.clone().avif({ quality: 52, effort: 6, chromaSubsampling: '4:2:0' }).toFile(avif);
+    await base.clone().webp({ quality: 78, effort: 5, smartSubsample: true }).toFile(webp);
     const avifKey: SizedKey = { w, key: `${keyPrefix}/${prefix}-${w}.avif` };
     const webpKey: SizedKey = { w, key: `${keyPrefix}/${prefix}-${w}.webp` };
     set.avif.push(avifKey);
@@ -144,7 +150,7 @@ async function processVideo(media: Media, src: string, work: string, keyPrefix: 
       '-hide_banner', '-y', '-i', src,
       '-map', '0:v:0', '-map', '0:a:0?',
       '-vf', longSide(1920), '-fpsmax', '60',
-      ...x264(22),
+      ...x264(22, { maxrate: 6000 }),
       '-c:a', 'aac', '-b:a', '128k', '-ac', '2',
       full,
     ]);
@@ -157,15 +163,16 @@ async function processVideo(media: Media, src: string, work: string, keyPrefix: 
   // 2. Prévias mudas para os loops (720 no desktop, 480 no celular)
   const start = Math.max(0, Math.min(media.previewStartSec, Math.max(0, duration - 1)));
   const length = Math.max(1, Math.min(media.previewLengthSec, duration - start || media.previewLengthSec));
-  for (const [name, side, crf] of [
-    ['p720', 1280, 26],
-    ['p480', 854, 28],
+  // Prévias são curtas: vale usar o preset "slow" (arquivo ~10% menor, mesma qualidade)
+  for (const [name, side, crf, maxrate] of [
+    ['p720', 1280, 26, 1600],
+    ['p480', 854, 28, 800],
   ] as const) {
     const out = path.join(work, `${name}.mp4`);
     await runFfmpeg([
       '-hide_banner', '-y', '-ss', start.toFixed(2), '-t', length.toFixed(2), '-i', full,
       '-an', '-vf', longSide(side), '-fpsmax', '30',
-      ...x264(crf, 'main'),
+      ...x264(crf, { profile: 'main', maxrate, preset: 'slow' }),
       out,
     ]);
     files.push({ file: out, key: `${keyPrefix}/${name}.mp4`, type: 'video/mp4' });
@@ -247,6 +254,48 @@ export async function processMedia(media: Media): Promise<void> {
   } finally {
     await fsp.rm(work, { recursive: true, force: true }).catch(() => {});
   }
+}
+
+let kicking = false;
+
+/** Aciona o processamento da fila em background no mesmo processo caso o worker externo não esteja rodando. */
+export function kickWorker(): void {
+  if (kicking) return;
+  kicking = true;
+  (async () => {
+    try {
+      while (true) {
+        const rows = await prisma.$queryRaw<{ id: string }[]>`
+          UPDATE "Media"
+             SET status = 'PROCESSING', "lockedAt" = now(), attempts = attempts + 1, "updatedAt" = now()
+           WHERE id = (
+             SELECT id FROM "Media"
+              WHERE status = 'PENDING'
+              ORDER BY "createdAt"
+              LIMIT 1
+              FOR UPDATE SKIP LOCKED
+           )
+           RETURNING id`;
+        if (!rows.length) break;
+        const m = await prisma.media.findUnique({ where: { id: rows[0].id } });
+        if (!m) break;
+        try {
+          await processMedia(m);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          const giveUp = m.attempts >= 3;
+          await prisma.media.update({
+            where: { id: m.id },
+            data: { status: giveUp ? 'ERROR' : 'PENDING', error: message.slice(0, 2000), lockedAt: null },
+          });
+        }
+      }
+    } catch {
+      /* ignora */
+    } finally {
+      kicking = false;
+    }
+  })();
 }
 
 export { probe, runFfmpeg, ffmpegBin };

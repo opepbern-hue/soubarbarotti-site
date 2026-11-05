@@ -11,11 +11,11 @@ export function PasswordForm() {
       <Field label="Senha atual">
         <input name="atual" type="password" required autoComplete="current-password" className={inputCls} />
       </Field>
-      <Field label="Senha nova" hint="Pelo menos 10 caracteres. Uma frase comprida é mais segura que uma palavra com símbolos.">
-        <input name="nova" type="password" required minLength={10} autoComplete="new-password" className={inputCls} />
+      <Field label="Senha nova" hint="Pelo menos 4 caracteres.">
+        <input name="nova" type="password" required minLength={4} autoComplete="new-password" className={inputCls} />
       </Field>
       <Field label="Repita a senha nova">
-        <input name="confirma" type="password" required minLength={10} autoComplete="new-password" className={inputCls} />
+        <input name="confirma" type="password" required minLength={4} autoComplete="new-password" className={inputCls} />
       </Field>
       <div>
         <button className={btnPrimary} disabled={pending}>

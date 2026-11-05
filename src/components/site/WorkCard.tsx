@@ -117,8 +117,7 @@ export function WorkCard({ project }: { project: ProjectCard }) {
           playing ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <span className="rec-dot !size-2" />
-        REC <span className="ml-1">{timecode(time)}</span>
+        <span>{timecode(time)}</span>
       </span>
 
       {/* Toque: seta fixa no canto · Mouse: círculo que segue o cursor */}

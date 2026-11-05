@@ -17,6 +17,8 @@
     "start:next": "next start",
     "start:prod": "tsx scripts/prod.ts",
     "typecheck": "tsc --noEmit",
+    "validate:admin": "tsx scripts/validate-admin.ts",
+    "senha": "tsx scripts/senha.ts",
     "importar": "tsx scripts/importar-site-antigo.ts"
   },
   "dependencies": {
@@ -27,6 +29,7 @@
     "ffmpeg-static": "^5.3.0",
     "jose": "^6.2.12",
     "leaflet": "^1.9.4",
+    "lenis": "^1.3.11",
     "next": "^16.3.6",
     "prisma": "^6.19.3",
     "react": "^19.3.0",

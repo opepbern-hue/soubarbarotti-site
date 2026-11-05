@@ -88,6 +88,10 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* rolagem com inércia (Lenis) assume no desktop; o navegador não anima por cima */
+    &.lenis-smooth {
+      scroll-behavior: auto;
+    }
     scroll-padding-top: var(--header-h);
     -webkit-text-size-adjust: 100%;
   }
@@ -221,6 +225,7 @@ div[class*="dev-indicator"] {
 .is-revealed.reveal-text {
   opacity: 1;
   transform: translateY(0%);
+  will-change: auto;
 }
 
 /* ------------------------------------------------------------------
@@ -244,6 +249,11 @@ div[class*="dev-indicator"] {
 .is-revealed.reveal-fade-up {
   opacity: 1;
   transform: translateY(0);
+}
+/* Depois de revelado, libera a camada de GPU (centenas de camadas travam a rolagem) */
+.reveal-box.is-revealed,
+.reveal-fade-up.is-revealed {
+  will-change: auto;
 }
 
 /* ------------------------------------------------------------------
@@ -270,6 +280,7 @@ div[class*="dev-indicator"] {
 .split-char.is-revealed {
   opacity: 1;
   transform: translateY(0%);
+  will-change: auto;
 }
 
 /* Letras que rolam (botão "Fale comigo") */
@@ -453,4 +464,10 @@ details[open]::details-content {
   .marquee [data-dup] {
     display: none;
   }
+}
+
+/* Vídeo em camada própria: cada quadro novo não repinta o texto e o HUD por cima */
+video {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

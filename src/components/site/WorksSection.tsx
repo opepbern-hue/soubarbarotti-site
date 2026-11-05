@@ -31,11 +31,11 @@ function ProjectStackCard({
     if (!hovering) setHovering(true);
   };
 
-  const posterBg = project.media?.img?.src || project.media?.blur;
+  const posterBg = project.media?.blur || project.media?.img?.src;
 
   return (
     <div
-      className="sticky top-20 sm:top-24 lg:top-28 pb-10 sm:pb-14 lg:pb-16 transition-transform"
+      className="sticky top-20 sm:top-24 lg:top-28 pb-10 sm:pb-14 lg:pb-16"
       style={{ zIndex: index + 10 }}
     >
       <Link
@@ -45,7 +45,7 @@ function ProjectStackCard({
         href={`/portfolio/${project.slug}`}
         onPointerMove={onMove}
         onPointerLeave={() => setHovering(false)}
-        className="on-video group relative block h-[60vh] sm:h-[64vh] lg:h-[68vh] min-h-[440px] max-h-[580px] w-full overflow-hidden rounded-3xl border border-white/20 bg-[#0a0a0d] text-white shadow-[0_-20px_60px_rgba(0,0,0,0.9)] transition-all duration-500 hover:border-white/40"
+        className="on-video group relative block h-[60vh] sm:h-[64vh] lg:h-[68vh] min-h-[440px] max-h-[580px] w-full overflow-hidden rounded-3xl border border-white/20 bg-[#0a0a0d] text-white shadow-[0_-20px_60px_rgba(0,0,0,0.9)] transition-colors duration-500 hover:border-white/40"
       >
         {/* 1. MÍDIA: TRATAMENTO DIFERENCIADO WIDESCREEN vs VERTICAL */}
         {portrait ? (
@@ -54,7 +54,7 @@ function ProjectStackCard({
             {posterBg ? (
               <span
                 aria-hidden
-                className="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 pointer-events-none transition-opacity duration-700"
+                className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-125 pointer-events-none"
                 style={{ backgroundImage: `url(${posterBg})` }}
               />
             ) : null}
@@ -86,19 +86,18 @@ function ProjectStackCard({
                 </div>
 
                 <div className="flex items-center gap-4 pt-4">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-display text-[12px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                    <span className="size-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-display text-[12px] font-bold uppercase tracking-wider text-white">
                     <span>9:16 Vertical</span>
                   </span>
 
-                  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-all group-hover:bg-zinc-200 group-hover:scale-105 shadow-xl">
+                  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-[background-color,scale] duration-300 group-hover:bg-zinc-200 group-hover:scale-105 shadow-xl">
                     Ver Case <ArrowUpRight className="size-4" />
                   </span>
                 </div>
               </div>
 
               {/* Moldura elegante do vídeo 9:16 */}
-              <div className="relative shrink-0 aspect-[9/16] h-[75%] sm:h-[82%] lg:h-[94%] max-h-[500px] rounded-2xl overflow-hidden border border-white/25 bg-black shadow-[0_25px_60px_rgba(0,0,0,0.95)] group-hover:border-white/50 transition-all duration-300">
+              <div className="relative shrink-0 aspect-[9/16] h-[75%] sm:h-[82%] lg:h-[94%] max-h-[500px] rounded-2xl overflow-hidden border border-white/25 bg-black shadow-[0_25px_60px_rgba(0,0,0,0.95)] group-hover:border-white/50 transition-colors duration-300">
                 <AutoVideo
                   media={project.media}
                   mode="visible"
@@ -117,13 +116,10 @@ function ProjectStackCard({
                 />
 
                 {/* Live timecode no topo da moldura */}
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-between font-mono text-[10px] text-white pointer-events-none">
-                  <span className="bg-black/70 px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm">
-                    ● REC
-                  </span>
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-end font-mono text-[10px] text-white pointer-events-none">
                   <span
                     ref={timeRef}
-                    className="bg-black/70 px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm"
+                    className="bg-black/70 px-2 py-0.5 rounded-full border border-white/20"
                   >
                     00:00:00
                   </span>
@@ -142,7 +138,7 @@ function ProjectStackCard({
                 if (timeRef.current) timeRef.current.textContent = timecode(t);
               }}
               onPlayingChange={setPlaying}
-              sizes="100vw"
+              sizes="(min-width: 1088px) 1024px, 100vw"
               fit="object-cover"
             />
 
@@ -162,16 +158,15 @@ function ProjectStackCard({
             {/* Barra superior do Card */}
             <div className="absolute top-6 left-6 right-6 sm:top-8 sm:left-8 sm:right-8 flex items-center justify-between pointer-events-none z-10">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-xs font-bold text-zinc-300 bg-black/75 px-3 py-1 rounded-full border border-white/20 backdrop-blur-md">
+                <span className="font-mono text-xs font-bold text-zinc-300 bg-black/75 px-3 py-1 rounded-full border border-white/20">
                   {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
                 </span>
-                <span className="font-display text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-zinc-300 bg-black/75 px-3.5 py-1 rounded-full border border-white/20 backdrop-blur-md">
+                <span className="font-display text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-zinc-300 bg-black/75 px-3.5 py-1 rounded-full border border-white/20">
                   <Fill text={project.category} />
                 </span>
               </div>
 
-              <span className="inline-flex items-center gap-2 font-mono text-[11px] font-bold text-white bg-black/75 px-3.5 py-1 rounded-full border border-white/20 backdrop-blur-md">
-                <span className="size-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="inline-flex items-center gap-2 font-mono text-[11px] font-bold text-white bg-black/75 px-3.5 py-1 rounded-full border border-white/20">
                 <span ref={timeRef}>00:00:00</span>
               </span>
             </div>
@@ -189,7 +184,7 @@ function ProjectStackCard({
                 )}
               </div>
 
-              <span className="pointer-events-auto self-start sm:self-end flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-all group-hover:bg-zinc-200 group-hover:scale-105 shadow-2xl">
+              <span className="pointer-events-auto self-start sm:self-end flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-[background-color,scale] duration-300 group-hover:bg-zinc-200 group-hover:scale-105 shadow-2xl">
                 Ver Case <ArrowUpRight className="size-4" />
               </span>
             </div>
@@ -235,20 +230,24 @@ export function WorksSection({
       <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-8 mb-12 sm:mb-16 lg:mb-20">
         <div className="flex items-end justify-between">
           <div>
-            <RecLabel className="text-zinc-400">{section.label || 'REC: TRABALHOS'}</RecLabel>
+            <RecLabel className="text-zinc-400">{section.label || 'TRABALHOS'}</RecLabel>
             <h2 className="mt-2 font-display text-[32px] sm:text-[40px] lg:text-[48px] font-bold leading-tight tracking-[-0.02em] text-white">
               {section.titleLine1 || 'Projetos em Destaque'}
-              {section.titleLine2 && (
+              {section.titleLine2 ? (
                 <span className="block text-zinc-400 font-normal">{section.titleLine2}</span>
+              ) : (
+                <span className="block text-zinc-400 font-normal text-[18px] sm:text-[22px] mt-1 font-sans">
+                  Mais de 120+ projetos entregues
+                </span>
               )}
             </h2>
           </div>
 
           <Link
             href="/portfolio"
-            className="hidden items-center gap-2 font-display text-[13px] font-semibold uppercase tracking-[0.06em] text-white/90 border border-white/20 bg-white/5 hover:bg-white hover:text-black rounded-full px-5 py-2.5 transition-all duration-300 md:flex shadow-lg"
+            className="hidden items-center gap-2 font-display text-[13px] font-semibold uppercase tracking-[0.06em] text-white/90 border border-white/20 bg-white/5 hover:bg-white hover:text-black rounded-full px-5 py-2.5 transition-colors duration-300 md:flex shadow-lg"
           >
-            Portfólio completo ({projects.length}) <ArrowUpRight className="size-4" />
+            Portfólio completo (+120 projetos entregues) <ArrowUpRight className="size-4" />
           </Link>
         </div>
       </div>
@@ -271,9 +270,9 @@ export function WorksSection({
       <div className="mt-16 sm:mt-20 flex justify-center relative z-10 px-5">
         <Link
           href="/portfolio"
-          className="inline-flex items-center gap-2 font-display text-[14px] font-semibold uppercase tracking-[0.05em] text-white hover:bg-white hover:text-black transition-all border border-white/20 rounded-full px-7 py-3.5 bg-black/80 backdrop-blur-md shadow-2xl hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2 font-display text-[14px] font-semibold uppercase tracking-[0.05em] text-white hover:bg-white hover:text-black transition-[background-color,color,scale] duration-300 border border-white/20 rounded-full px-7 py-3.5 bg-black/80 shadow-2xl hover:scale-105 active:scale-95"
         >
-          Ver o portfólio completo ({projects.length}) <ArrowUpRight className="size-4" />
+          Ver o portfólio completo (+120 projetos entregues) <ArrowUpRight className="size-4" />
         </Link>
       </div>
     </section>

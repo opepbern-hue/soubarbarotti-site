@@ -5,8 +5,8 @@ import { PhotoGallery } from './PhotoGallery';
 import { IFSCActivitiesSection } from './IFSCActivitiesSection';
 
 const CONFIG: Record<GalleryCollection, { key: string; path: string; noun: 'foto' | 'arte'; label: string; line1: string; empty: string }> = {
-  FOTO: { key: 'pagina_fotos', path: '/fotos', noun: 'foto', label: 'REC: Fotos', line1: 'as fotos', empty: '[PREENCHER: suba as fotos no admin, em Fotos]' },
-  ARTE: { key: 'pagina_artes', path: '/artes', noun: 'arte', label: 'REC: Artes', line1: 'as artes', empty: '[PREENCHER: suba as artes no admin, em Artes]' },
+  FOTO: { key: 'pagina_fotos', path: '/fotos', noun: 'foto', label: 'Fotos', line1: 'as fotos', empty: '[PREENCHER: suba as fotos no admin, em Fotos]' },
+  ARTE: { key: 'pagina_artes', path: '/artes', noun: 'arte', label: 'Artes', line1: 'as artes', empty: '[PREENCHER: suba as artes no admin, em Artes]' },
 };
 
 /** Página pública de galeria (Fotos ou Artes): baixar, copiar e compartilhar o link */

@@ -7,6 +7,7 @@ import { changePassword, login, logout, requireAdmin, revokeOtherSessions } from
 import { SITE_TAG } from '@/lib/content';
 import { prisma } from '@/lib/db';
 import type { MediaVariants } from '@/lib/media';
+import { kickWorker } from '@/lib/processing';
 import { slugify } from '@/lib/slug';
 import { storage } from '@/lib/storage';
 
@@ -22,6 +23,7 @@ const num = (fd: FormData, k: string, fallback = 0) => {
 
 function refresh(...paths: string[]) {
   revalidateTag(SITE_TAG, { expire: 0 });
+  revalidatePath('/', 'layout');
   for (const p of paths) revalidatePath(p);
 }
 
@@ -171,9 +173,23 @@ export async function toggleProject(fd: FormData) {
 export async function deleteProject(fd: FormData) {
   await requireAdmin();
   const id = str(fd, 'id');
+  const existing = await prisma.project.findUnique({
+    where: { id },
+    include: { gallery: { select: { mediaId: true } } },
+  });
+  if (!existing) back('/admin/portfolio', 'Projeto já havia sido excluído.');
   const p = await prisma.project.delete({ where: { id } });
-  refresh('/admin/portfolio');
-  back('/admin/portfolio', `“${p.title}” excluído. O vídeo continua em Mídias.`);
+  const mediaIds = [
+    existing.heroMediaId,
+    existing.coverMediaId,
+    existing.fullVideoMediaId,
+    ...existing.gallery.map((g) => g.mediaId),
+  ].filter((x): x is string => !!x);
+  for (const mId of new Set(mediaIds)) {
+    await deleteMediaIfUnused(mId);
+  }
+  refresh('/admin/portfolio', '/portfolio', '/');
+  back('/admin/portfolio', `“${p.title}” excluído permanentemente.`);
 }
 
 // ---------- ordem genérica (↑ ↓) ----------
@@ -326,39 +342,88 @@ export async function deleteListItem(fd: FormData) {
   const model = str(fd, 'model') as ListModel;
   const path = LIST_PATH[model];
   if (!path) redirect('/admin');
-  const delegate = (prisma as unknown as Record<string, { delete: (a: object) => Promise<unknown> }>)[model];
-  await delegate.delete({ where: { id: str(fd, 'id') } });
-  refresh(path);
-  back(path, 'Excluído.');
+  const id = str(fd, 'id');
+  if (model === 'brand') {
+    const b = await prisma.brand.findUnique({ where: { id } });
+    await prisma.brand.delete({ where: { id } });
+    if (b?.logoMediaId) await deleteMediaIfUnused(b.logoMediaId);
+  } else if (model === 'testimonial') {
+    const t = await prisma.testimonial.findUnique({ where: { id } });
+    await prisma.testimonial.delete({ where: { id } });
+    if (t?.avatarMediaId) await deleteMediaIfUnused(t.avatarMediaId);
+  } else {
+    const delegate = (prisma as unknown as Record<string, { delete: (a: object) => Promise<unknown> }>)[model];
+    await delegate.delete({ where: { id } });
+  }
+  refresh(path, '/');
+  back(path, 'Excluído permanentemente.');
 }
 
 // ---------- processo ----------
 
 export async function saveStep(fd: FormData) {
   await requireAdmin();
-  await prisma.processStep.update({
-    where: { id: str(fd, 'id') },
-    data: { title: str(fd, 'title'), description: str(fd, 'description'), tools: str(fd, 'tools'), mediaId: opt(fd, 'mediaId') },
-  });
-  refresh('/admin/processo');
-  back('/admin/processo');
+  const id = str(fd, 'id');
+  const title = str(fd, 'title');
+  if (!title) back('/admin/processo', 'O título da etapa é obrigatório.');
+  if (id) {
+    await prisma.processStep.update({
+      where: { id },
+      data: { title, description: str(fd, 'description'), tools: str(fd, 'tools'), mediaId: opt(fd, 'mediaId') },
+    });
+  } else {
+    const last = await prisma.processStep.aggregate({ _max: { number: true } });
+    await prisma.processStep.create({
+      data: {
+        number: (last._max.number ?? 0) + 1,
+        title,
+        description: str(fd, 'description'),
+        tools: str(fd, 'tools'),
+        mediaId: opt(fd, 'mediaId'),
+      },
+    });
+  }
+  refresh('/admin/processo', '/');
+  back('/admin/processo', id ? 'Etapa salva.' : 'Etapa adicionada.');
+}
+
+export async function deleteStep(fd: FormData) {
+  await requireAdmin();
+  const id = str(fd, 'id');
+  const step = await prisma.processStep.findUnique({ where: { id } });
+  if (step) {
+    await prisma.processStep.delete({ where: { id } });
+    if (step.mediaId) await deleteMediaIfUnused(step.mediaId);
+    // Renumerar as etapas restantes em sequência 1..N
+    const remaining = await prisma.processStep.findMany({ orderBy: { number: 'asc' } });
+    for (let i = 0; i < remaining.length; i++) {
+      if (remaining[i].number !== i + 1) {
+        await prisma.processStep.update({ where: { id: remaining[i].id }, data: { number: i + 1 } });
+      }
+    }
+  }
+  refresh('/admin/processo', '/');
+  back('/admin/processo', 'Etapa excluída permanentemente.');
 }
 
 // ---------- seções ----------
 
 export async function saveSection(fd: FormData) {
   await requireAdmin();
-  await prisma.section.update({
-    where: { key: str(fd, 'key') },
-    data: {
-      enabled: bool(fd, 'enabled'),
-      label: str(fd, 'label'),
-      titleLine1: str(fd, 'titleLine1'),
-      titleLine2: str(fd, 'titleLine2'),
-      intro: str(fd, 'intro'),
-    },
+  const key = str(fd, 'key');
+  const payload = {
+    enabled: bool(fd, 'enabled'),
+    label: str(fd, 'label').replace(/^●?\s*REC:\s*/i, ''),
+    titleLine1: str(fd, 'titleLine1'),
+    titleLine2: str(fd, 'titleLine2'),
+    intro: str(fd, 'intro'),
+  };
+  await prisma.section.upsert({
+    where: { key },
+    create: { key, ...payload },
+    update: payload,
   });
-  refresh('/admin/secoes');
+  refresh('/admin/secoes', '/');
   back('/admin/secoes');
 }
 
@@ -368,37 +433,55 @@ export async function saveSettings(fd: FormData) {
   await requireAdmin();
   const group = str(fd, 'group');
   const data: Record<string, unknown> = {};
-  const text = (k: string) => (data[k] = str(fd, k));
+  const textIfPresent = (k: string) => {
+    if (fd.has(k)) data[k] = str(fd, k);
+  };
   if (group === 'abertura') {
-    data.heroMediaId = opt(fd, 'heroMediaId');
-    text('heroLocation');
-    text('heroTagline');
-    data.heroList = str(fd, 'heroList')
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean);
-    data.numbersUseCounters = bool(fd, 'numbersUseCounters');
-    text('numbersPhrase');
-    text('numbersCounterText');
+    if (fd.has('heroMediaId')) data.heroMediaId = opt(fd, 'heroMediaId');
+    if (fd.has('heroLocation')) data.heroLocation = str(fd, 'heroLocation').replace(/^●?\s*REC:\s*/i, '');
+    textIfPresent('heroTagline');
+    if (fd.has('heroList')) {
+      data.heroList = str(fd, 'heroList')
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+    }
+    if (fd.has('numbersPhrase') || fd.has('numbersCounterText') || fd.has('numbersUseCountersPresent')) {
+      data.numbersUseCounters = bool(fd, 'numbersUseCounters');
+      textIfPresent('numbersPhrase');
+      textIfPresent('numbersCounterText');
+    }
   }
   if (group === 'sobre') {
-    data.aboutMediaId = opt(fd, 'aboutMediaId');
-    ['aboutTag', 'aboutName', 'aboutRole', 'aboutBio'].forEach(text);
+    if (fd.has('aboutMediaId')) data.aboutMediaId = opt(fd, 'aboutMediaId');
+    ['aboutTag', 'aboutName', 'aboutRole', 'aboutBio'].forEach(textIfPresent);
   }
   if (group === 'contato') {
-    ['contactEmail', 'instagramUrl', 'linkedinUrl', 'youtubeUrl'].forEach(text);
-    data.whatsapp = str(fd, 'whatsapp').replace(/\D/g, '');
+    ['contactEmail', 'instagramUrl', 'linkedinUrl', 'youtubeUrl'].forEach(textIfPresent);
+    if (fd.has('whatsapp')) data.whatsapp = str(fd, 'whatsapp').replace(/\D/g, '');
   }
   if (group === 'rodape') {
-    ['footerLine1', 'footerLine2', 'entityPhrase', 'seoTitle', 'seoDescription'].forEach(text);
-    data.ogMediaId = opt(fd, 'ogMediaId');
+    ['footerLine1', 'footerLine2', 'entityPhrase', 'seoTitle', 'seoDescription'].forEach(textIfPresent);
+    if (fd.has('ogMediaId')) data.ogMediaId = opt(fd, 'ogMediaId');
   }
-  await prisma.siteSettings.update({ where: { id: 1 }, data });
-  refresh('/admin/site');
+  await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    create: { id: 1, ...data },
+    update: data,
+  });
+  refresh('/admin/site', '/');
   back(`/admin/site#${group}`);
 }
 
 // ---------- mídias ----------
+
+async function removeMediaStorageAndRow(m: { id: string; variants: unknown; tempPath: string | null }) {
+  const v = m.variants as MediaVariants | null;
+  if (v?.version) await storage().deletePrefix(`m/${m.id}/${v.version}`).catch(() => {});
+  await storage().deletePrefix(`m/${m.id}`).catch(() => {});
+  if (m.tempPath) await fsp.rm(m.tempPath, { force: true }).catch(() => {});
+  await prisma.media.delete({ where: { id: m.id } });
+}
 
 async function deleteMediaIfUnused(id: string) {
   const m = await prisma.media.findUnique({
@@ -424,17 +507,18 @@ async function deleteMediaIfUnused(id: string) {
   if (!m) return false;
   const uses = Object.values(m._count).reduce((a, b) => a + b, 0);
   if (uses > 0) return false;
-  const v = m.variants as MediaVariants | null;
-  if (v?.version) await storage().deletePrefix(`m/${m.id}/${v.version}`).catch(() => {});
-  if (m.tempPath) await fsp.rm(m.tempPath, { force: true }).catch(() => {});
-  await prisma.media.delete({ where: { id } });
+  await removeMediaStorageAndRow(m);
   return true;
 }
 
 export async function deleteMedia(fd: FormData) {
   await requireAdmin();
-  const ok = await deleteMediaIfUnused(str(fd, 'id'));
-  back('/admin/midias', ok ? 'Mídia apagada.' : 'Essa mídia ainda está em uso. Tire de onde ela aparece antes de apagar.');
+  const id = str(fd, 'id');
+  const m = await prisma.media.findUnique({ where: { id } });
+  if (!m) back('/admin/midias', 'Mídia já foi apagada.');
+  await removeMediaStorageAndRow(m);
+  refresh('/admin/midias', '/admin/portfolio', '/admin/fotos', '/admin/artes', '/');
+  back('/admin/midias', 'Mídia apagada permanentemente.');
 }
 
 /** Refaz capa e prévia (ou tenta de novo depois de um erro) */
@@ -445,6 +529,7 @@ export async function reprocessMedia(fd: FormData) {
   if (media.kind === 'IMAGE' && !media.tempPath) {
     // Imagem já processada: o original não é guardado, então só dá para trocar o texto alternativo
     await prisma.media.update({ where: { id }, data: { alt: str(fd, 'alt') } });
+    refresh('/admin/midias');
     back('/admin/midias');
   }
   const poster = str(fd, 'posterAtSec');
@@ -460,7 +545,10 @@ export async function reprocessMedia(fd: FormData) {
       previewLengthSec: Math.min(30, Math.max(2, num(fd, 'previewLengthSec', 8))),
     },
   });
-  back('/admin/midias', 'Na fila: a capa e a prévia novas aparecem em alguns minutos.');
+  // Aciona processamento em background caso o worker externo não esteja rodando
+  kickWorker();
+  refresh('/admin/midias');
+  back('/admin/midias', 'Na fila: a capa e a prévia novas aparecem em alguns instantes.');
 }
 
 export async function saveMediaAlt(fd: FormData) {

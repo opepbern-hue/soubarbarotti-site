@@ -18,7 +18,7 @@ export default function ErrorBoundary({
     <div className="min-h-screen bg-[#0a0705] text-[#f7efe6] flex items-center justify-center px-6 selection:bg-[#ff5500] selection:text-white">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#ff5500]/10 border border-[#ff5500]/30 text-[#ff5500] font-mono text-sm">
-          REC
+          !
         </div>
 
         <div className="space-y-2">

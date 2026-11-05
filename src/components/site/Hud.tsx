@@ -2,14 +2,15 @@ import type { ReactNode } from 'react';
 import { ScrollReveal, SplitText } from './ScrollReveal';
 import { Fill } from './Text';
 
-/** Selo "● REC: …" */
+/** Selo de seção */
 export function RecLabel({ children, className = '' }: { children: string; className?: string }) {
+  const clean = children.replace(/^●?\s*REC:\s*/i, '').trim();
+  if (!clean) return null;
   return (
     <p className={`flex items-center gap-2.5 font-display text-[14px] leading-[1.3] font-medium uppercase ${className}`}>
-      <span className="rec-dot" aria-hidden />
       {/* Revela sozinho quando aparece na tela (também fora de um SectionHeading) */}
       <ScrollReveal as="span">
-        <SplitText text={children} speed="medium" mode="chars" />
+        <SplitText text={clean} speed="medium" mode="chars" />
       </ScrollReveal>
     </p>
   );

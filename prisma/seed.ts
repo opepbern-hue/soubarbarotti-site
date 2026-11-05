@@ -8,42 +8,42 @@ const P = (o: string) => `[PREENCHER: ${o}]`;
 export const SECTIONS = [
   { key: 'marcas', label: '', titleLine1: '', titleLine2: '', intro: '' },
   { key: 'numeros', label: '', titleLine1: '', titleLine2: '', intro: '' },
-  { key: 'trabalhos', label: 'REC: Trabalhos', titleLine1: '', titleLine2: '', intro: '' },
+  { key: 'trabalhos', label: 'Trabalhos', titleLine1: '', titleLine2: '', intro: '' },
   {
     key: 'processo',
-    label: 'REC: Processo',
+    label: 'Processo',
     titleLine1: 'do roteiro',
     titleLine2: 'ao color grade',
     intro: 'Cinco etapas, cada uma com a sua ferramenta. Nenhuma cena é gerada antes de estar planejada.',
   },
-  { key: 'sobre', label: 'REC: Sobre', titleLine1: 'quem dirige', titleLine2: 'cada cena', intro: 'Uma pessoa só, do roteiro à entrega.' },
+  { key: 'sobre', label: 'Sobre', titleLine1: 'quem dirige', titleLine2: 'cada cena', intro: 'Uma pessoa só, do roteiro à entrega.' },
   {
     key: 'planos',
-    label: 'REC: Planos',
+    label: 'Planos',
     titleLine1: 'três formas',
     titleLine2: 'de trabalhar comigo',
     intro: 'Escolha o formato mais perto do seu projeto. Se nenhum servir, a gente monta um sob medida.',
   },
-  { key: 'depoimentos', label: 'REC: Depoimentos', titleLine1: 'quem já', titleLine2: 'trabalhou comigo', intro: '' },
+  { key: 'depoimentos', label: 'Depoimentos', titleLine1: 'quem já', titleLine2: 'trabalhou comigo', intro: '' },
   {
     key: 'perguntas',
-    label: 'REC: Perguntas',
+    label: 'Perguntas',
     titleLine1: 'o que perguntam',
     titleLine2: 'antes de fechar',
     intro: 'As dúvidas que aparecem antes de todo projeto.',
   },
-  { key: 'contato', label: 'REC: Contato', titleLine1: 'me conta', titleLine2: 'a sua ideia', intro: '' },
-  { key: 'pagina_trabalhos', label: 'REC: Portfólio', titleLine1: 'os filmes', titleLine2: 'que eu dirigi', intro: '' },
+  { key: 'contato', label: 'Contato', titleLine1: 'me conta', titleLine2: 'a sua ideia', intro: '' },
+  { key: 'pagina_trabalhos', label: 'Portfólio', titleLine1: 'os filmes', titleLine2: 'que eu dirigi', intro: '' },
   {
     key: 'pagina_fotos',
-    label: 'REC: Fotos',
+    label: 'Fotos',
     titleLine1: 'as fotos',
     titleLine2: 'pode baixar',
     intro: 'Baixe em alta ou copie e cole direto onde quiser.',
   },
   {
     key: 'pagina_artes',
-    label: 'REC: Artes',
+    label: 'Artes',
     titleLine1: 'as artes',
     titleLine2: 'pode baixar',
     intro: 'Baixe em alta ou copie e cole direto onde quiser.',
@@ -197,36 +197,35 @@ export async function seed(prisma: PrismaClient, log = console.log, withPlacehol
       });
     }
     log('[seed] 4 trabalhos criados (Echo Labs, Calebe, Descomplicando Varejo, Myskillzy)');
-  }
-
-  if ((await prisma.processStep.count()) === 0) {
-    for (const s of STEPS) {
-      await prisma.processStep.create({ data: { ...s, mediaId: media[`etapa-${s.number}`] } });
+    if ((await prisma.processStep.count()) === 0) {
+      for (const s of STEPS) {
+        await prisma.processStep.create({ data: { ...s, mediaId: media[`etapa-${s.number}`] } });
+      }
+      log('[seed] 5 etapas do processo criadas');
     }
-    log('[seed] 5 etapas do processo criadas');
-  }
 
-  if ((await prisma.plan.count()) === 0) {
-    for (let i = 0; i < 3; i++) {
-      await prisma.plan.create({
-        data: { order: i, name: P(`nome do plano ${i + 1}`), description: P('para quem é e o que inclui'), price: P('valor ou "sob consulta"') },
-      });
+    if ((await prisma.plan.count()) === 0) {
+      for (let i = 0; i < 3; i++) {
+        await prisma.plan.create({
+          data: { order: i, name: P(`nome do plano ${i + 1}`), description: P('para quem é e o que inclui'), price: P('valor ou "sob consulta"') },
+        });
+      }
+      log('[seed] 3 planos criados');
     }
-    log('[seed] 3 planos criados');
-  }
 
-  if ((await prisma.faq.count()) === 0) {
-    for (const [i, q] of FAQS.entries()) {
-      await prisma.faq.create({ data: { order: i, question: q, answer: P('sua resposta') } });
+    if ((await prisma.faq.count()) === 0) {
+      for (const [i, q] of FAQS.entries()) {
+        await prisma.faq.create({ data: { order: i, question: q, answer: P('sua resposta') } });
+      }
+      log('[seed] 8 perguntas criadas (respostas em branco)');
     }
-    log('[seed] 8 perguntas criadas (respostas em branco)');
-  }
 
-  if ((await prisma.brand.count()) === 0) {
-    for (const [i, name] of ['Echo Labs', 'Calebe', 'Descomplicando Varejo', 'Myskillzy'].entries()) {
-      await prisma.brand.create({ data: { name, order: i } });
+    if ((await prisma.brand.count()) === 0) {
+      for (const [i, name] of ['Echo Labs', 'Calebe', 'Descomplicando Varejo', 'Myskillzy'].entries()) {
+        await prisma.brand.create({ data: { name, order: i } });
+      }
+      log('[seed] faixa de marcas criada');
     }
-    log('[seed] faixa de marcas criada');
   }
 }
 

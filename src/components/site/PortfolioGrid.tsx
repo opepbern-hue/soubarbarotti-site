@@ -50,7 +50,6 @@ function PortfolioCard({ project, index }: { project: ProjectCard; index: number
           {String(index + 1).padStart(2, '0')} · <Fill text={project.category} />
         </span>
         <span className={`flex items-center gap-1.5 tabular-nums transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`} aria-hidden>
-          <span className="rec-dot !size-1.5" />
           {timecode(time)}
         </span>
       </span>

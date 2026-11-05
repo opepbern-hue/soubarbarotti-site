@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import type { Lead } from '@prisma/client';
 import {
   createLeadAction,
@@ -238,10 +239,13 @@ SAÍDA
           </form>
 
           {unreadMessagesCount > 0 && (
-            <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200">
+            <Link
+              href="/admin/mensagens"
+              className="flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100 transition-colors"
+            >
               <span>📩</span>
-              <span>{unreadMessagesCount} mensagem(ns) do site</span>
-            </div>
+              <span>{unreadMessagesCount} mensagem(ns) do site →</span>
+            </Link>
           )}
         </div>
       </div>

@@ -2,6 +2,7 @@
 import fsp from 'node:fs/promises';
 import { adminGuard } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { kickWorker } from '@/lib/processing';
 import { sniffFile } from '@/lib/sniff';
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -26,5 +27,6 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     where: { id },
     data: { status: 'PENDING', kind: sniffed.kind, mimeType: sniffed.type, receivedBytes: size },
   });
+  kickWorker();
   return Response.json({ id, kind: sniffed.kind, status: 'PENDING' });
 }

@@ -139,7 +139,7 @@ export type PasswordResult = { ok: true } | { ok: false; error: string };
 export async function changePassword(current: string, next: string): Promise<PasswordResult> {
   await requireAdmin();
   if (!(await verifyPassword(current, await passwordHash()))) return { ok: false, error: 'A senha atual não confere.' };
-  if (next.length < 10) return { ok: false, error: 'A senha nova precisa ter pelo menos 10 caracteres.' };
+  if (next.length < 4) return { ok: false, error: 'A senha nova precisa ter pelo menos 4 caracteres.' };
   const hash = await hashPassword(next);
   await prisma.adminAccount.upsert({ where: { id: 1 }, create: { id: 1, passwordHash: hash }, update: { passwordHash: hash } });
   await revokeOtherSessions();

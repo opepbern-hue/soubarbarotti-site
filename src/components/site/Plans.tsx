@@ -3,13 +3,15 @@ import { Container, SectionHeading } from './Hud';
 import { Fill } from './Text';
 
 export function Plans({ section, plans }: { section: SectionView; plans: PlanView[] }) {
+  const valid = plans.filter((p) => p.name && !p.name.includes('[PREENCHER'));
+  if (!valid.length) return null;
   return (
     <section id="planos" className="scroll-mt-16 py-[80px] lg:py-[75px]">
       <Container>
         <SectionHeading label={section.label} line1={section.titleLine1} line2={section.titleLine2} intro={section.intro} />
         <ol className="mt-[60px] lg:mt-[110px]">
-          {plans.map((p, i) => {
-            const price = p.onRequest ? 'sob consulta' : p.price || '[PREENCHER: valor ou "sob consulta"]';
+          {valid.map((p, i) => {
+            const price = p.onRequest ? 'sob consulta' : p.price || 'sob consulta';
             return (
               <li
                 key={p.id}

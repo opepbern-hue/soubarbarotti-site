@@ -70,7 +70,7 @@ export default async function Midias({ searchParams }: Props) {
                 </form>
                 <form action={deleteMedia} className="mt-2">
                   <input type="hidden" name="id" value={m.id} />
-                  <ConfirmButton className={btnDanger} message="Apagar esta mídia? Só funciona se ela não estiver em uso.">
+                  <ConfirmButton className={btnDanger} message="Apagar esta mídia permanentemente do site e do banco?">
                     Apagar
                   </ConfirmButton>
                 </form>

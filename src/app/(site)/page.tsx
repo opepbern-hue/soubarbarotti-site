@@ -88,6 +88,7 @@ export default async function HomePage() {
 
       {on('sobre') ? <About section={sec('sobre')} settings={settings} /> : null}
 
+      {on('planos') ? <Plans section={sec('planos')} plans={plans} /> : null}
 
       {on('depoimentos') ? <Testimonials section={sec('depoimentos')} items={testimonials} /> : null}
 

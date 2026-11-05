@@ -1,9 +1,20 @@
+import { preload } from 'react-dom';
 import type { SettingsView } from '@/lib/content';
 import { AutoVideo } from './AutoVideo';
 import { ScrollReveal, SplitText } from './ScrollReveal';
 
 export function Hero({ settings }: { settings: SettingsView }) {
   const media = settings.heroMedia;
+  // A capa do hero é a primeira coisa que aparece: o navegador já pede junto com o HTML
+  if (media?.img) {
+    preload(media.img.src, {
+      as: 'image',
+      fetchPriority: 'high',
+      imageSrcSet: media.img.avif,
+      imageSizes: '100vw',
+      type: 'image/avif',
+    });
+  }
   const location = settings.heroLocation?.trim() || 'Palhoça, SC & Remoto';
   const tagline = settings.heroTagline;
   const list =
@@ -38,17 +49,15 @@ export function Hero({ settings }: { settings: SettingsView }) {
         <div aria-hidden className="absolute inset-0 -z-10 bg-zinc-950" />
       )}
 
-      {/* 2. BARRA SUPERIOR: REC: LOCALIZAÇÃO */}
+      {/* 2. BARRA SUPERIOR: LOCALIZAÇÃO */}
       <div className="relative z-10 mx-auto w-full max-w-[1536px] px-6 sm:px-10 lg:px-14 xl:px-16 pt-24 sm:pt-32 lg:pt-36">
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex size-2.5 items-center justify-center">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-red-600 shadow-[0_0_8px_#ef4444]" />
-          </span>
-          <span className="font-mono text-[11px] sm:text-[12px] font-medium tracking-[0.2em] uppercase text-zinc-300 drop-shadow">
-            REC: {location.toUpperCase()}
-          </span>
-        </div>
+        {location ? (
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[11px] sm:text-[12px] font-medium tracking-[0.2em] uppercase text-zinc-300 drop-shadow">
+              {location.replace(/^●?\s*REC:\s*/i, '').toUpperCase()}
+            </span>
+          </div>
+        ) : null}
       </div>
 
       {/* 3. CENTRO MONUMENTAL: NOME GIGANTE ESTILO RUSHES ("BARBAROTTI.") */}

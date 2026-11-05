@@ -30,7 +30,7 @@ export function VideoTitle({
   return (
     <span aria-hidden className={`fit-host block select-none ${className}`}>
       <span className="fit-title relative isolate block text-white font-bold tracking-tight">
-        {word(<span className="rec-blink text-red-500">.</span>)}
+        {word(<span className="text-[#ff6a00]">.</span>)}
       </span>
     </span>
   );

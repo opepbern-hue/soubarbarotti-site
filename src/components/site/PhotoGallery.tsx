@@ -176,6 +176,7 @@ export function PhotoGallery({ photos, basePath = '/fotos', noun = 'foto' }: { p
 
       <dialog
         ref={dialogRef}
+        data-lenis-prevent
         onClose={() => open !== null && show(null)}
         onClick={(e) => {
           if (e.target === e.currentTarget) show(null);

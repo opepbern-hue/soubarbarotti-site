@@ -6,6 +6,7 @@ import { Header, type NavItem } from './Header';
 import { JsonLd } from './JsonLd';
 import { Preloader } from './Preloader';
 import { AmbientSoundWidget } from './AmbientSoundWidget';
+import { SmoothScroll } from './SmoothScroll';
 
 export async function navItems(): Promise<NavItem[]> {
   const sections = await getSections();
@@ -23,6 +24,7 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <JsonLd data={globalJsonLd(settings)} />
+      <SmoothScroll />
       <Header items={items} ctaLabel="Fale comigo" />
       <main id="conteudo" tabIndex={-1} className="outline-none">
         {children}

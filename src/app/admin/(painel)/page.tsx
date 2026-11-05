@@ -1,19 +1,21 @@
 import Link from 'next/link';
 import { AutoRefresh, Flash } from '@/components/admin/AutoRefresh';
 import { PageHead, btnPrimary, btnGhost, StatusBadge } from '@/components/admin/ui';
-import { okMessage } from '@/lib/admin-data';
+import { okMessage, pendingFills } from '@/lib/admin-data';
 import { prisma } from '@/lib/db';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function Painel({ searchParams }: Props) {
-  const [ok, projectsCount, photosCount, artsCount, mediaCount, processing, errors, recentProjects] =
+  const [ok, projectsCount, photosCount, artsCount, mediaCount, leadsCount, unreadMsgs, processing, errors, recentProjects, fills] =
     await Promise.all([
       okMessage(searchParams),
       prisma.project.count({ where: { published: true } }),
       prisma.photo.count({ where: { published: true, collection: 'FOTO' } }),
       prisma.photo.count({ where: { published: true, collection: 'ARTE' } }),
       prisma.media.count(),
+      prisma.lead.count(),
+      prisma.contactMessage.count({ where: { readAt: null, archived: false } }),
       prisma.media.count({ where: { status: { in: ['PENDING', 'PROCESSING'] } } }),
       prisma.media.count({ where: { status: 'ERROR' } }),
       prisma.project.findMany({
@@ -21,6 +23,7 @@ export default async function Painel({ searchParams }: Props) {
         take: 6,
         select: { id: true, title: true, category: true, published: true, featured: true },
       }),
+      pendingFills().catch(() => []),
     ]);
 
   const tiles = [
@@ -28,6 +31,8 @@ export default async function Painel({ searchParams }: Props) {
     { label: 'Vídeos & Mídias', value: mediaCount, href: '/admin/midias' },
     { label: 'Fotos Publicadas', value: photosCount, href: '/admin/fotos' },
     { label: 'Artes Publicadas', value: artsCount, href: '/admin/artes' },
+    { label: 'Leads no Mapa', value: leadsCount, href: '/admin/leads' },
+    { label: 'Mensagens não lidas', value: unreadMsgs, href: '/admin/mensagens' },
   ];
 
   return (
@@ -36,7 +41,7 @@ export default async function Painel({ searchParams }: Props) {
       <AutoRefresh active={processing > 0} every={6000} />
       <PageHead
         title="Painel do Site"
-        intro="Gerencie seus filmes, vídeos, fotos e o conteúdo visual do portfólio."
+        intro="Gerencie seus filmes, vídeos, fotos, seções da Home, leads e mensagens de contato."
       >
         <Link href="/admin/portfolio" className={btnPrimary}>
           + Adicionar Projeto
@@ -44,7 +49,7 @@ export default async function Painel({ searchParams }: Props) {
       </PageHead>
 
       {/* Cards de Métricas */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {tiles.map((t) => (
           <Link
             key={t.label}
@@ -73,6 +78,25 @@ export default async function Painel({ searchParams }: Props) {
         </p>
       ) : null}
 
+      {/* Pendências [PREENCHER] se existirem */}
+      {fills.length > 0 ? (
+        <div className="mt-6 rounded-2xl bg-amber-950/30 p-5 ring-1 ring-amber-500/30">
+          <h3 className="font-display text-[16px] font-semibold text-amber-300">
+            Campos pendentes de preenchimento ({fills.length})
+          </h3>
+          <ul className="mt-2 grid gap-1.5 text-[13px] text-fumaca">
+            {fills.slice(0, 8).map((f, idx) => (
+              <li key={idx}>
+                <Link href={f.href} className="text-brasa hover:underline font-medium">
+                  {f.where}:
+                </Link>{' '}
+                <span>{f.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {/* Atalhos Rápidos */}
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         <Link
@@ -85,20 +109,20 @@ export default async function Painel({ searchParams }: Props) {
         </Link>
 
         <Link
-          href="/admin/midias"
+          href="/admin/secoes"
           className="rounded-2xl bg-branco-tela p-6 ring-1 ring-linha transition-all hover:shadow-md hover:ring-brasa"
         >
-          <h3 className="font-display text-[18px] font-semibold">Mídias & Vídeos</h3>
-          <p className="mt-1 text-[13px] text-fumaca">Faça upload de vídeos pesados e ajuste os frames das capas.</p>
-          <span className="mt-4 inline-block text-[13px] font-semibold text-brasa">Abrir biblioteca →</span>
+          <h3 className="font-display text-[18px] font-semibold">Seções, FAQ & Marcas</h3>
+          <p className="mt-1 text-[13px] text-fumaca">Ligue/desligue blocos da Home e edite títulos, processo, marcas e FAQ.</p>
+          <span className="mt-4 inline-block text-[13px] font-semibold text-brasa">Configurar seções →</span>
         </Link>
 
         <Link
           href="/admin/site"
           className="rounded-2xl bg-branco-tela p-6 ring-1 ring-linha transition-all hover:shadow-md hover:ring-brasa"
         >
-          <h3 className="font-display text-[18px] font-semibold">Abertura & Sobre</h3>
-          <p className="mt-1 text-[13px] text-fumaca">Troque o vídeo de fundo da abertura e sua foto de perfil.</p>
+          <h3 className="font-display text-[18px] font-semibold">Abertura, Sobre & Contato</h3>
+          <p className="mt-1 text-[13px] text-fumaca">Troque o vídeo de fundo da abertura, foto de perfil, redes e SEO.</p>
           <span className="mt-4 inline-block text-[13px] font-semibold text-brasa">Editar visual →</span>
         </Link>
       </div>

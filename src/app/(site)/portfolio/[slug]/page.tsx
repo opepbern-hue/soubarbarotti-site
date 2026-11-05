@@ -150,7 +150,7 @@ export default async function ProjectPage({ params }: Props) {
 
         {next ? (
           <section aria-label="Próximo projeto" className="pb-[80px] pt-[60px] lg:pb-[120px] lg:pt-[90px]">
-            <RecLabel>REC: Próximo projeto</RecLabel>
+            <RecLabel>Próximo projeto</RecLabel>
             <div className="mt-6 border-t border-linha">
               <WorkRow project={next} as="h2" />
             </div>

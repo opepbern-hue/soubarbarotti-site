@@ -86,9 +86,9 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,padding,box-shadow,border-color] duration-300 ${
           scrolled || open
-            ? 'bg-black/85 backdrop-blur-xl border-b border-white/10 py-4 shadow-2xl'
+            ? 'bg-black/90 border-b border-white/10 py-4 shadow-2xl'
             : 'bg-transparent py-6 sm:py-8'
         }`}
       >
@@ -122,7 +122,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
           </nav>
 
           {/* Container de Botões no Menu (Instagram + Fale comigo) */}
-          <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 p-1 backdrop-blur-xl shadow-lg">
+          <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/20 bg-black/70 p-1 shadow-lg">
             <a
               href="https://instagram.com/soubarbarotti"
               target="_blank"
@@ -162,7 +162,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
           ref={panelRef}
           className={`relative overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${
             open
-              ? 'max-h-[calc(100vh-5rem)] border-t border-white/10 bg-black/95 backdrop-blur-2xl opacity-100 shadow-2xl'
+              ? 'max-h-[calc(100vh-5rem)] border-t border-white/10 bg-black/95 opacity-100 shadow-2xl'
               : 'max-h-0 border-t-0 opacity-0'
           }`}
         >
@@ -230,7 +230,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
       {/* Overlay escuro ao abrir o menu mobile */}
       {open && (
         <div
-          className="fixed inset-0 top-20 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-300 lg:hidden"
+          className="fixed inset-0 top-20 z-40 bg-black/70 transition-opacity duration-300 lg:hidden"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />

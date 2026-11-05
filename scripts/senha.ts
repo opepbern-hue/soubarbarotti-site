@@ -10,8 +10,8 @@ loadEnv();
 
 async function main() {
   const password = process.argv.slice(2).join(' ').trim();
-  if (password.length < 10) {
-    console.log('Uso: npm run senha -- "sua nova senha"   (mínimo de 10 caracteres)');
+  if (!password) {
+    console.log('Uso: npm run senha -- "sua nova senha"');
     process.exit(1);
   }
   const hash = await hashPassword(password);

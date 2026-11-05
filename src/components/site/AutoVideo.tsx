@@ -99,7 +99,7 @@ export function AutoVideo({
         <span
           aria-hidden
           className={`absolute -inset-8 bg-cover bg-center blur-2xl brightness-[.55] saturate-125 ${backdrop}`}
-          style={{ backgroundImage: `url(${media.img?.src ?? media.blur})` }}
+          style={{ backgroundImage: `url(${media.blur})` }}
         />
       ) : null}
       <Picture media={media} sizes={sizes} priority={priority} alt="" blurPlaceholder={!backdrop} className={`absolute inset-0 h-full w-full ${fit}`} />
@@ -110,7 +110,7 @@ export function AutoVideo({
           muted
           playsInline
           loop
-          preload="none"
+          preload={src ? 'auto' : 'none'}
           aria-hidden
           tabIndex={-1}
           disablePictureInPicture

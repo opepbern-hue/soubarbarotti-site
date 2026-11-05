@@ -5,13 +5,22 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { logoutAction } from '@/app/admin/actions';
 
-const LINKS = [
+const LINKS: { href: string; label: string; badge?: 'unread' }[] = [
   { href: '/admin', label: 'Painel' },
   { href: '/admin/portfolio', label: 'Portfólio' },
   { href: '/admin/midias', label: 'Mídias & Vídeos' },
   { href: '/admin/fotos', label: 'Fotos' },
   { href: '/admin/artes', label: 'Artes' },
-  { href: '/admin/site', label: 'Abertura & Sobre' },
+  { href: '/admin/site', label: 'Abertura, Sobre & SEO' },
+  { href: '/admin/secoes', label: 'Seções & Títulos' },
+  { href: '/admin/processo', label: 'Processo' },
+  { href: '/admin/marcas', label: 'Marcas' },
+  { href: '/admin/perguntas', label: 'Perguntas (FAQ)' },
+  { href: '/admin/depoimentos', label: 'Depoimentos' },
+  { href: '/admin/planos', label: 'Planos' },
+  { href: '/admin/leads', label: 'Mapa de Leads' },
+  { href: '/admin/mensagens', label: 'Mensagens', badge: 'unread' },
+  { href: '/admin/ideias', label: 'Ideias' },
   { href: '/admin/seguranca', label: 'Segurança' },
 ];
 
@@ -21,7 +30,7 @@ export function AdminNav({ unread = 0 }: { unread?: number }) {
   const active = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   return (
-    <aside className="sticky top-0 z-40 border-b border-linha bg-[#0d0d12]/95 backdrop-blur-md lg:h-[100svh] lg:border-b-0 lg:border-r">
+    <aside className="sticky top-0 z-40 border-b border-linha bg-[#0d0d12]/95 backdrop-blur-md lg:h-[100svh] lg:overflow-y-auto lg:border-b-0 lg:border-r">
       <div className="flex h-14 items-center justify-between px-4 lg:h-auto lg:flex-col lg:items-start lg:gap-1 lg:px-6 lg:pt-8">
         <Link href="/admin" className="font-display text-[18px] font-semibold tracking-[-0.03em] text-white">
           soubarbarotti<span className="text-[#ff6a00]">.</span> <span className="text-[12px] font-medium uppercase text-fumaca">admin</span>
@@ -49,7 +58,10 @@ export function AdminNav({ unread = 0 }: { unread?: number }) {
                     : 'text-fumaca hover:bg-nevoa/70 hover:text-carvao'
                 }`}
               >
-                {l.label}
+                <span>{l.label}</span>
+                {l.badge === 'unread' && unread > 0 ? (
+                  <span className="rounded-full bg-brasa px-2 py-0.5 text-[11px] font-bold text-black">{unread}</span>
+                ) : null}
               </Link>
             </li>
           ))}

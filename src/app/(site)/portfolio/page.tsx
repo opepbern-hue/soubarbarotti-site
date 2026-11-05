@@ -21,10 +21,10 @@ export default async function PortfolioPage() {
           <SectionHeading
             as="h1"
             size="page"
-            label={head?.label || 'REC: Portfólio'}
+            label={head?.label || 'Portfólio'}
             line1={head?.titleLine1 || 'os filmes'}
             line2={head?.titleLine2 || 'que eu dirigi'}
-            intro={head?.intro}
+            intro={head?.intro || 'Mais de 120+ projetos entregues com direção cinematográfica, IA generativa e pós-produção de alto padrão.'}
           />
           <div className="mt-[60px] md:mt-[90px]">
             {projects.length ? (

@@ -74,7 +74,37 @@ const localDriver: StorageDriver = {
     await fsp.writeFile(destPath, buffer);
   },
   async deletePrefix(prefix) {
-    await fsp.rm(localPathFor(prefix), { recursive: true, force: true });
+    const clean = safeKey(prefix);
+    await fsp.rm(localPathFor(clean), { recursive: true, force: true });
+    // Remove também do Supabase Storage se existir espelhamento
+    try {
+      const listRes = await fetch(`${SUPABASE_STORAGE_BASE}/storage/v1/object/list/media`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prefix: clean, limit: 100 }),
+      });
+      if (listRes.ok) {
+        const items = (await listRes.json()) as { name?: string }[];
+        const prefixes = items.filter((i) => i.name).map((i) => `${clean.replace(/\/$/, '')}/${i.name}`);
+        if (prefixes.length > 0) {
+          await fetch(`${SUPABASE_STORAGE_BASE}/storage/v1/object/media`, {
+            method: 'DELETE',
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prefixes }),
+          });
+        }
+      }
+    } catch {
+      /* ignora falha de rede ao limpar espelho */
+    }
   },
   async read(key) {
     const file = localPathFor(key);
