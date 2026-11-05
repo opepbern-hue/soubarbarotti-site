@@ -13,7 +13,10 @@ export const env = {
     return str('SESSION_SECRET', 'soubarbarotti-default-session-secret-key-32chars');
   },
   get adminPasswordHash() {
-    return str('ADMIN_PASSWORD_HASH', '');
+    return str(
+      'ADMIN_PASSWORD_HASH',
+      'scrypt:JVPQngqNac7H7vbM4hxhrQ:ar5JmyRX6I6geHHVTAYhWqsM3h5jAUBUXOs91JaxMHs4Ys1OaFrK8TWTHaFpqRDeIzvHrKslkdwPrlQ7RJFIFQ',
+    );
   },
   /** `local` (pasta no disco) ou `r2` (Cloudflare R2 / qualquer S3) */
   get storageDriver(): 'local' | 'r2' {
