@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { soundEngine } from './ambient-audio';
+import { BarbarottiSymbol } from './Header';
 
 const STORAGE_KEY = 'hasPageLoaded';
 
@@ -77,8 +78,8 @@ export function Preloader() {
         }, 650);
       }}
       style={{
-        backgroundColor: isLight ? '#f8f8f8' : '#100f0f',
-        color: isLight ? '#100f0f' : '#f8f8f8',
+        backgroundColor: isLight ? '#ffffff' : '#16110d',
+        color: isLight ? '#16110d' : '#ffffff',
         transform: isCollapsing ? 'scaleY(0)' : 'scaleY(1)',
         transformOrigin: 'top top',
         transition:
@@ -95,15 +96,15 @@ export function Preloader() {
         className="flex flex-col items-center gap-3 px-6 text-center"
       >
         <div className="flex items-center border border-current">
-          <span className="bg-paragon-blue px-3 py-1.5 font-display text-[20px] font-bold tracking-tight text-paragon-black uppercase">
-            SB
+          <span className="grid size-[38px] place-items-center border-r border-current bg-paragon-blue text-paragon-black">
+            <BarbarottiSymbol className="size-5" />
           </span>
           <span className="px-4 py-1.5 font-kicker text-[13px] tracking-[0.04em] uppercase">
             SOUBARBAROTTI // DIREÇÃO &amp; IA
           </span>
         </div>
         <p className="font-display text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.92] font-medium uppercase">
-          SOUBARBAROTTI
+          BARBAROTTI
         </p>
       </div>
     </aside>

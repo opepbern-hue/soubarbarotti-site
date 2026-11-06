@@ -1,48 +1,49 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------
-   Sistema de Tokens — Direção Visual Paragon Productions
+   Sistema de Tokens — Identidade @soubarbarotti + Arquitetura Paragon
    ------------------------------------------------------------------ */
 :root {
-  /* Swatches Exatos da Paragon (:root) */
-  --paragon-black: #100f0f;
-  --paragon-white: #f8f8f8;
-  --paragon-red: #ff5b4b;
-  --paragon-blue: #44b6fd;
-  --paragon-blue-light: #88d4f5;
-  --paragon-teal: #508992;
-  --paragon-grey-50: #e6e9ea;
-  --paragon-grey-100: #d9d9d9;
-  --paragon-grey-300: #c8c8c8;
-  --paragon-grey-400: #9b9b9b;
-  --paragon-grey-500: #6d6c6c;
-  --paragon-grey-600: #2c2c2c;
+  /* Paleta Oficial @soubarbarotti (Branco como tela, laranja como luz) */
+  --branco-tela: #ffffff;
+  --amanhecer: #ffffff;
+  --nevoa: #fff2e8;
+  --carvao: #241c16;
+  --fumaca: #75685e;
+  --linha: #241c16;
+  --linha-suave: #efe5dc;
+  --linha-invert: rgba(255, 255, 255, 0.22);
 
-  /* Mapeamento Semântico dos Tokens do Projeto para a Paleta Paragon */
-  --branco-tela: #f8f8f8;
-  --amanhecer: #f8f8f8;
-  --nevoa: #e6e9ea;
-  --carvao: #100f0f;
-  --fumaca: #6d6c6c;
-  --linha: #100f0f;
-  --linha-invert: rgba(248, 248, 248, 0.22);
+  /* Laranjas de Assinatura @soubarbarotti */
+  --ambar: #ffa62b;
+  --laranja-barbarotti: #ff6a00;
+  --brasa: #c24100;
+  --azul-ceu: #ff6a00;
+  --azul-ceu-light: #ffa62b;
+  --azul-ceu-glow: rgba(255, 106, 0, 0.32);
 
-  /* Acentos Paragon */
-  --ambar: #44b6fd;
-  --laranja-barbarotti: #ff5b4b;
-  --brasa: #ff5b4b;
-  --azul-ceu: #44b6fd;
-  --azul-ceu-light: #88d4f5;
-  --azul-ceu-glow: rgba(68, 182, 253, 0.35);
+  /* Mapeamento Semântico da Arquitetura Paragon para as Cores do Barbarotti */
+  --paragon-black: #16110d;
+  --paragon-white: #ffffff;
+  --paragon-red: #ff6a00;
+  --paragon-blue: #ff6a00;
+  --paragon-blue-light: #ffa62b;
+  --paragon-teal: #fff2e8;
+  --paragon-grey-50: #fff2e8;
+  --paragon-grey-100: #efe5dc;
+  --paragon-grey-300: #fff2e8;
+  --paragon-grey-400: #a8998c;
+  --paragon-grey-500: #75685e;
+  --paragon-grey-600: #241c16;
 
-  /* Gradientes & Superfícies */
-  --grad-golden-hour: linear-gradient(135deg, #100f0f 0%, #1c1b1b 100%);
-  --grad-amanhecer: linear-gradient(180deg, #f8f8f8 0%, #e6e9ea 100%);
+  /* Gradientes & Superfícies @soubarbarotti */
+  --grad-golden-hour: linear-gradient(135deg, #ffa62b 0%, #ff6a00 50%, #c24100 100%);
+  --grad-amanhecer: linear-gradient(180deg, #ffffff 0%, #fff2e8 100%);
   --grad-light-leak: radial-gradient(
     ellipse 75% 100% at 85% 0%,
-    rgba(248, 248, 248, 0.06) 0%,
-    rgba(248, 248, 248, 0.01) 45%,
-    rgba(0, 0, 0, 0) 100%
+    rgba(255, 106, 0, 0.24) 0%,
+    rgba(255, 166, 43, 0.1) 45%,
+    rgba(255, 166, 43, 0) 100%
   );
 
   /* Grid, Container e Bordas Paragon */

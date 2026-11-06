@@ -113,16 +113,16 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
         className="fixed inset-x-0 top-[16px] z-50 lg:top-[24px]"
       >
         <div className="paragon-container">
-          {/* Desktop Navbar (2 grupos arquitetônicos com borda 1px solid #100f0f e altura 48px) */}
+          {/* Desktop Navbar (2 grupos arquitetônicos com borda 1px solid #16110d e altura 48px) */}
           <div className="hidden h-[48px] items-stretch justify-between lg:flex">
-            {/* Grupo Esquerdo: Logo Sky Blue + Links em células #f8f8f8 */}
+            {/* Grupo Esquerdo: Símbolo Barbarotti em Laranja #FF6A00 + Links em células #FFFFFF */}
             <div className="flex items-stretch border border-paragon-black bg-paragon-white text-paragon-black">
               <Link
                 href="/"
                 aria-label="Barbarotti: início"
                 className="grid w-[52px] place-items-center border-r border-paragon-black bg-paragon-blue text-paragon-black transition-colors duration-300 hover:bg-paragon-blue-light"
               >
-                <ParagonMarkIcon className="size-6" />
+                <BarbarottiSymbol className="size-6" />
               </Link>
               <nav aria-label="Principal" className="flex items-stretch">
                 <ul className="flex items-stretch">
@@ -140,7 +140,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
                           aria-current={current ? 'true' : undefined}
                           className={`nav_menu_link flex items-center px-4 font-kicker text-[14px] leading-none font-normal uppercase transition-colors duration-300 xl:px-5 xl:text-[15px] ${
                             current
-                              ? 'bg-paragon-grey-400 text-paragon-black'
+                              ? 'bg-paragon-grey-300 font-medium text-paragon-black'
                               : 'bg-paragon-white text-paragon-black hover:bg-paragon-grey-300'
                           }`}
                         >
@@ -153,7 +153,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
               </nav>
             </div>
 
-            {/* Grupo Direito: Marquee Contínuo + Botão Sky Blue "Fale comigo ↳" */}
+            {/* Grupo Direito: Marquee Contínuo + Botão Laranja Barbarotti "Fale comigo ↳" */}
             <div className="flex items-stretch border border-paragon-black bg-paragon-white text-paragon-black">
               <div
                 aria-hidden="true"
@@ -178,7 +178,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
               <Link
                 href="/#contato"
                 aria-label={ctaLabel}
-                className="roll-host flex items-center gap-2.5 bg-paragon-blue px-4 font-kicker text-[14px] leading-none font-normal text-paragon-black uppercase transition-colors duration-300 hover:bg-paragon-grey-300 xl:px-5 xl:text-[15px]"
+                className="roll-host flex items-center gap-2.5 bg-paragon-blue px-4 font-kicker text-[14px] leading-none font-normal text-paragon-black uppercase transition-colors duration-300 hover:bg-paragon-blue-light xl:px-5 xl:text-[15px]"
               >
                 <RollText text={ctaLabel} />
                 <CornerArrowIcon className="size-3.5 shrink-0" />
@@ -186,7 +186,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
             </div>
           </div>
 
-          {/* Mobile Navbar (Barra única de 3 células: Logo 48x48 | Marquee | Toggle 52x48) */}
+          {/* Mobile Navbar (Barra única de 3 células: Símbolo 48x48 | Marquee | Toggle 52x48) */}
           <div className="flex h-[48px] w-full items-stretch border border-paragon-black bg-paragon-white text-paragon-black lg:hidden">
             <Link
               href="/"
@@ -194,7 +194,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
               aria-label="Barbarotti: início"
               className="grid w-[48px] shrink-0 place-items-center border-r border-paragon-black bg-paragon-blue text-paragon-black"
             >
-              <ParagonMarkIcon className="size-5" />
+              <BarbarottiSymbol className="size-5.5" />
             </Link>
 
             <div aria-hidden="true" className="flex min-w-0 flex-1 items-center overflow-hidden bg-paragon-white px-1">
@@ -252,7 +252,7 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
         </div>
       </header>
 
-      {/* Menu Mobile Full-Screen (#100f0f, Links 50.125px uppercase, Rodapé com redes sublinhadas) */}
+      {/* Menu Mobile Full-Screen (#16110d, Links 50.125px uppercase, Rodapé com redes sublinhadas) */}
       <div
         id="menu-celular"
         ref={panelRef}
@@ -338,17 +338,14 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
   );
 }
 
-/** Emblema geométrico da marca (substitui o ícone da Paragon na célula #44b6fd) */
-function ParagonMarkIcon({ className = 'size-6' }: { className?: string }) {
+/** Símbolo oficial @soubarbarotti (quadro arredondado de cinema com prisma Play interno) */
+export function BarbarottiSymbol({ className = 'size-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 28 28" fill="none" className={className} aria-hidden="true">
-      <rect x="2.5" y="4.5" width="23" height="19" rx="9.5" stroke="currentColor" strokeWidth="2.2" />
+      <rect x="2.75" y="2.75" width="22.5" height="22.5" rx="6" stroke="currentColor" strokeWidth="2.2" />
       <path
-        d="M9 14h10M15 10l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
+        d="M11.2 9.15c0-.62.68-1 1.21-.68l7.45 4.55c.51.31.51 1.05 0 1.36l-7.45 4.55c-.53.32-1.21-.06-1.21-.68V9.15Z"
+        fill="currentColor"
       />
     </svg>
   );

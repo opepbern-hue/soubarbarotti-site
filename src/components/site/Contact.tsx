@@ -94,7 +94,7 @@ export function Contact({ section, settings }: { section: SectionView; settings:
 
   return (
     <section id="contato" aria-label="Contato" className="scroll-mt-16">
-      {/* Parte 1: Banner Monumental Coral Red (#ff5b4b) com Badges Arrastáveis (section.home-cta_wrap da Paragon) */}
+      {/* Parte 1: Banner Monumental Laranja Barbarotti (#ff6a00) com Badges Arrastáveis (section.home-cta_wrap da Paragon) */}
       <div
         data-sticker="wrap"
         className="home-cta_wrap relative overflow-hidden border-t border-paragon-black bg-paragon-red py-[84px] text-paragon-black lg:py-[140px]"

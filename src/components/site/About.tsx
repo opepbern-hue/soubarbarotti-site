@@ -42,7 +42,7 @@ export function About({
       aria-label="Sobre Barbarotti"
       className="home-pillars_wrap relative scroll-mt-16 overflow-hidden bg-paragon-black py-[80px] text-paragon-white lg:py-[140px]"
     >
-      {/* Fita Vetorial S-Curve em Teal (#508992) idêntica à seção Always in Pursuit da Paragon */}
+      {/* Fita Vetorial S-Curve em Laranja Barbarotti (#ff6a00) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute top-0 right-[-8%] z-0 w-[85%] max-w-[980px] opacity-90 lg:right-[-2%]"
@@ -50,13 +50,13 @@ export function About({
         <svg viewBox="0 0 1000 540" fill="none" className="h-auto w-full">
           <path
             d="M920 -40C720 40 520 90 540 185C560 280 860 220 840 340C820 460 420 460 80 520"
-            stroke="#508992"
+            stroke="#ff6a00"
             strokeWidth="74"
             strokeLinecap="butt"
           />
           <path
             d="M920 -40C720 40 520 90 540 185C560 280 860 220 840 340C820 460 420 460 80 520"
-            stroke="#100f0f"
+            stroke="#16110d"
             strokeWidth="2"
             strokeDasharray="12 12"
           />
@@ -139,7 +139,7 @@ export function About({
             </div>
           </div>
 
-          {/* Mural de Molduras Polaroid Inclinadas (#f8f8f8) com Retrato do Diretor e Fotografias Reais */}
+          {/* Mural de Molduras Polaroid Inclinadas (#ffffff) com Retrato do Diretor e Fotografias Reais */}
           <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3 lg:gap-12">
             {/* Polaroid 1: Retrato Principal do Barbarotti */}
             <div className="paragon-polaroid-item mx-auto w-full max-w-[340px] border border-paragon-black bg-paragon-white p-3 pb-8 text-paragon-black shadow-2xl transition-transform duration-500 hover:rotate-0">

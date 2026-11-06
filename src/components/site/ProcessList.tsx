@@ -163,7 +163,7 @@ export function ProcessList({ steps }: { steps: ProcessStepView[] }) {
         })}
       </div>
 
-      {/* MOBILE: Painéis Empilhados com Borda 1px solid #100f0f (mobile-home-fold2.png da Paragon) */}
+      {/* MOBILE: Painéis Empilhados com Borda 1px solid #16110d (mobile-home-fold2.png da Paragon) */}
       <ol className="flex flex-col border-t border-x border-paragon-black lg:hidden">
         {steps.map((step, i) => {
           const swatch = PANEL_SWATCHES[i % PANEL_SWATCHES.length];

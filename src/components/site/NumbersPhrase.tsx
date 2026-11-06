@@ -6,7 +6,7 @@ import { prefersReducedMotion } from './video-coordinator';
 
 type Token = { type: 'text'; text: string; strong: boolean } | { type: 'count'; value: number };
 
-/** `**trecho**` vira destaque em Coral Red (#ff5b4b) · `{{120}}` vira contador que sobe ao entrar na tela */
+/** `**trecho**` vira destaque em Laranja Barbarotti (#ff6a00) · `{{120}}` vira contador que sobe ao entrar na tela */
 function tokenize(src: string): Token[] {
   const out: Token[] = [];
   for (const chunk of src.split(/(\*\*[^*]+\*\*)/g)) {
