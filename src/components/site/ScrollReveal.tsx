@@ -27,7 +27,7 @@ export function ScrollReveal({
           observer.disconnect();
         }
       },
-      { threshold: 0.05, rootMargin: '60px 0px 0px 0px' }
+      { threshold: 0.05, rootMargin: '80px 0px 0px 0px' },
     );
 
     observer.observe(el);
@@ -45,21 +45,20 @@ export function ScrollReveal({
   );
 }
 
-
 export type SplitSpeed = 'hero' | 'slow' | 'medium' | 'fast';
 
+// Timings baseados no SplitText da Paragon: duration 600ms, ease power4.out (cubic-bezier(0.16, 1, 0.3, 1)), stagger ~100ms total
 const SPEED_CONFIGS: Record<SplitSpeed, { stagger: number; duration: number; mode: 'chars' | 'words' }> = {
-  hero: { stagger: 25, duration: 800, mode: 'chars' },
-  slow: { stagger: 35, duration: 750, mode: 'chars' },
-  medium: { stagger: 20, duration: 650, mode: 'chars' },
-  fast: { stagger: 30, duration: 550, mode: 'words' },
+  hero: { stagger: 22, duration: 650, mode: 'chars' },
+  slow: { stagger: 28, duration: 600, mode: 'words' },
+  medium: { stagger: 18, duration: 600, mode: 'words' },
+  fast: { stagger: 16, duration: 550, mode: 'words' },
 };
 
 /**
- * Divisão de texto no estilo AnimeJS (splitText).
- * Recorta cada caractere/palavra em máscara `overflow: hidden`,
- * aplica animação de subida (`translateY(115% -> 0%)`) e desfoque (`filter: blur(12px -> 0px)`).
- * Revela uma única vez ao rolar a tela ("SEM OUT").
+ * Revelação de texto com máscara por linha/palavra no estilo SplitText da Paragon:
+ * padding-block: 0.125em; margin-block: -0.125em; overflow: clip;
+ * translateY(110% -> 0%), duration: 0.6s, ease: cubic-bezier(0.16, 1, 0.3, 1).
  */
 export function SplitText({
   text,
@@ -83,8 +82,6 @@ export function SplitText({
   const staggerStep = stagger ?? config.stagger;
   const animDuration = duration ?? config.duration;
 
-  // Palavras separadas por espaços de verdade: o texto quebra linha normalmente,
-  // inclusive quando vem em pedaços (ex.: trecho em destaque no meio da frase)
   const parts = text.split(/(\s+)/);
   let charCounter = 0;
   let wordCounter = 0;
@@ -95,10 +92,13 @@ export function SplitText({
         if (!part) return null;
         if (/^\s+$/.test(part)) return ' ';
         if (splitMode === 'words') {
-          const d = delay + wordCounter++ * staggerStep;
+          const d = delay + Math.min(wordCounter++ * staggerStep, 180);
           return (
-            <span key={i} className="split-char-mask">
-              <span className="split-char" style={{ '--delay': `${d}ms`, '--duration': `${animDuration}ms` } as React.CSSProperties}>
+            <span key={i} className="line-mask">
+              <span
+                className="split-char"
+                style={{ '--delay': `${d}ms`, '--duration': `${animDuration}ms` } as React.CSSProperties}
+              >
                 {part}
               </span>
             </span>
@@ -108,11 +108,12 @@ export function SplitText({
           <span key={i} className="inline-block whitespace-nowrap">
             {[...part].map((ch, charIndex) => {
               const idx = charCounter++;
+              const d = delay + Math.min(idx * staggerStep, 220);
               return (
-                <span key={charIndex} className="split-char-mask">
+                <span key={charIndex} className="char-mask">
                   <span
                     className="split-char"
-                    style={{ '--delay': `${delay + idx * staggerStep}ms`, '--duration': `${animDuration}ms` } as React.CSSProperties}
+                    style={{ '--delay': `${d}ms`, '--duration': `${animDuration}ms` } as React.CSSProperties}
                   >
                     {ch}
                   </span>
@@ -126,7 +127,6 @@ export function SplitText({
   );
 }
 
-/** Componente auxiliar simples mantido para compatibilidade */
 export function MaskLineReveal({
   text,
   delay = 0,

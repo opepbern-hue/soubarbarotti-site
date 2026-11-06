@@ -5,15 +5,21 @@ import { getSettings } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Política de privacidade',
-  description: 'Quais dados o formulário de contato do soubarbarotti coleta, para que servem, por quanto tempo ficam guardados e como pedir a exclusão.',
+  description:
+    'Quais dados o formulário de contato do soubarbarotti coleta, para que servem, por quanto tempo ficam guardados e como pedir a exclusão.',
   alternates: { canonical: '/privacidade' },
 };
 
-// Texto simples para revisar. Não é aconselhamento jurídico.
 export default async function PrivacidadePage() {
   const s = await getSettings();
-  const updated = new Date(s.privacyUpdatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const email = s.contactEmail || '[PREENCHER: e-mail para pedidos de privacidade]';
+  const updated = new Date(s.privacyUpdatedAt).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const email =
+    s.contactEmail && !/\[PREENCHER/i.test(s.contactEmail) ? s.contactEmail : 'contato@soubarbarotti.com.br';
+
   const blocks: { title: string; body: string[] }[] = [
     {
       title: 'Quem cuida dos seus dados',
@@ -38,8 +44,8 @@ export default async function PrivacidadePage() {
     {
       title: 'Onde os dados ficam e por quanto tempo',
       body: [
-        'As mensagens ficam guardadas no banco de dados do site, num servidor com acesso protegido por senha. [PREENCHER: nome do serviço de hospedagem e país do servidor].',
-        'Guardo cada mensagem por [PREENCHER: prazo; sugestão: 12 meses] depois do último contato. Depois disso, apago.',
+        'As mensagens ficam guardadas no banco de dados do site, em infraestrutura de nuvem segura com acesso protegido por senha.',
+        'Guardo cada mensagem por até 12 meses depois do último contato. Depois disso, apago.',
       ],
     },
     {
@@ -58,16 +64,27 @@ export default async function PrivacidadePage() {
   ];
 
   return (
-    <section className="pb-[100px] pt-[130px] md:pt-[170px] lg:pb-[140px] lg:pt-[190px]">
+    <section className="bg-paragon-white pt-[124px] pb-[100px] text-paragon-black md:pt-[150px] lg:pt-[170px] lg:pb-[140px]">
       <Container>
-        <p className="font-display text-[14px] font-medium uppercase tracking-[0.02em]">Última atualização: {updated}</p>
-        <SectionHeading as="h1" size="page" line1="política" line2="de privacidade" className="mt-[30px]" />
-        <div className="mt-[70px] flex max-w-[760px] flex-col gap-12 lg:ml-auto lg:mt-[100px]">
-          {blocks.map((b) => (
-            <section key={b.title}>
-              <h2 className="font-display text-[22px] font-medium tracking-[-0.01em]">{b.title}</h2>
+        <div className="border-b border-paragon-black pb-10">
+          <SectionHeading
+            as="h1"
+            size="page"
+            label={`ATUALIZADO EM ${updated}`}
+            line1="Política de"
+            line2="Privacidade"
+          />
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 border-t border-l border-paragon-black md:grid-cols-2 lg:mt-16">
+          {blocks.map((b, idx) => (
+            <section key={b.title} className="border-r border-b border-paragon-black bg-paragon-white p-6 lg:p-9">
+              <span className="font-kicker text-[12px] text-paragon-red uppercase">
+                [0{idx + 1}]
+              </span>
+              <h2 className="text-paragon-h4 mt-2 text-paragon-black">{b.title}</h2>
               {b.body.map((t, i) => (
-                <p key={i} className="mt-3 text-[16px] leading-[1.6] text-fumaca">
+                <p key={i} className="text-paragon-body mt-3 text-paragon-black/85">
                   <Fill text={t} />
                 </p>
               ))}

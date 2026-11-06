@@ -6,7 +6,7 @@ import { prefersReducedMotion } from './video-coordinator';
 
 type Token = { type: 'text'; text: string; strong: boolean } | { type: 'count'; value: number };
 
-/** `**trecho**` vira destaque em Brasa · `{{120}}` vira contador que sobe ao entrar na tela */
+/** `**trecho**` vira destaque em Coral Red (#ff5b4b) · `{{120}}` vira contador que sobe ao entrar na tela */
 function tokenize(src: string): Token[] {
   const out: Token[] = [];
   for (const chunk of src.split(/(\*\*[^*]+\*\*)/g)) {
@@ -23,15 +23,7 @@ function tokenize(src: string): Token[] {
 }
 
 export function NumbersPhrase({ text }: { text: string }) {
-  // Se a frase não tiver quebras de linha explícitas (\n), aplicamos o diagrama exato da imagem de referência
-  const formattedText = text.includes('\n')
-    ? text
-    : text.replace(
-        'A IA gera as cenas. **Eu decido** o que entra, o que é refeito e como tudo vira **um filme só**.',
-        'A IA gera as cenas. **Eu**\n**decido** o que entra, o que é\nrefeito e como tudo vira **um**\n**filme só.**',
-      );
-
-  const lines = formattedText.split('\n');
+  const lines = text.split('\n');
   const hasCounters = lines.some((l) => tokenize(l).some((t) => t.type === 'count'));
   const ref = useRef<HTMLParagraphElement>(null);
   const [progress, setProgress] = useState(1);
@@ -64,33 +56,45 @@ export function NumbersPhrase({ text }: { text: string }) {
   }, [hasCounters]);
 
   return (
-    <ScrollReveal delay={100}>
-      <p
-        ref={ref}
-        className="font-display text-[38px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[60px] md:leading-[0.98] md:tracking-[-0.04em] lg:text-[76px]"
-      >
-        {lines.map((line, lineIdx) => {
-          const tokens = tokenize(line);
-          return (
-            <span key={lineIdx} className="block">
-              {tokens.map((t, i) =>
-                t.type === 'count' ? (
-                  <span key={i} className="font-semibold tabular-nums text-brasa">
-                    {Math.round(t.value * progress).toLocaleString('pt-BR')}
-                  </span>
-                ) : t.strong ? (
-                  <span key={i} className="font-semibold text-brasa">
-                    <SplitText text={t.text} speed="slow" mode="chars" delay={(lineIdx * 4 + i) * 40} />
-                  </span>
-                ) : (
-                  <SplitText key={i} text={t.text} speed="slow" mode="chars" delay={(lineIdx * 4 + i) * 40} />
-                ),
-              )}
-            </span>
-          );
-        })}
-      </p>
-    </ScrollReveal>
+    <div className="grid grid-cols-1 items-start gap-8 border-b border-paragon-black pb-12 lg:grid-cols-12 lg:pb-16">
+      <div className="lg:col-span-3">
+        <span className="text-paragon-kicker inline-flex items-center gap-2 text-paragon-black">
+          <span aria-hidden="true" className="text-paragon-red">
+            ✦
+          </span>
+          <span>O que eu faço</span>
+        </span>
+      </div>
+
+      <div className="lg:col-span-9">
+        <ScrollReveal delay={60}>
+          <p
+            ref={ref}
+            className="font-display text-[clamp(2.35rem,4.6vw,4.5rem)] leading-[0.98] font-medium tracking-normal text-paragon-black uppercase"
+          >
+            {lines.map((line, lineIdx) => {
+              const tokens = tokenize(line);
+              return (
+                <span key={lineIdx} className="block">
+                  {tokens.map((t, i) =>
+                    t.type === 'count' ? (
+                      <span key={i} className="font-semibold text-paragon-red tabular-nums">
+                        {Math.round(t.value * progress).toLocaleString('pt-BR')}
+                      </span>
+                    ) : t.strong ? (
+                      <span key={i} className="text-paragon-red">
+                        <SplitText text={t.text} speed="slow" mode="words" delay={(lineIdx * 4 + i) * 30} />
+                      </span>
+                    ) : (
+                      <SplitText key={i} text={t.text} speed="slow" mode="words" delay={(lineIdx * 4 + i) * 30} />
+                    ),
+                  )}
+                </span>
+              );
+            })}
+          </p>
+        </ScrollReveal>
+      </div>
+    </div>
   );
 }
-

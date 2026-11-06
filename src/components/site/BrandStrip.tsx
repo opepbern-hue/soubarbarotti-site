@@ -1,9 +1,9 @@
 import type { Brand } from '@/lib/content';
 
-const SKILLS = [
+const FALLBACK_SKILLS = [
   'VÍDEOS COM IA',
   'DIREÇÃO CINEMATOGRÁFICA',
-  'MOTION DESIGNER',
+  'MOTION DESIGN',
   'VFX & ANIMAÇÃO',
   'COPY DE ALTA CONVERSÃO',
   'COLOR GRADE 4K',
@@ -12,12 +12,20 @@ const SKILLS = [
 ];
 
 export function BrandStrip({ brands }: { brands?: Brand[] }) {
-  const items = SKILLS;
-  // Repete para marquee contínuo e suave
+  const cleanBrands = (brands ?? [])
+    .map((b) => b.name.trim())
+    .filter((name) => name && !/\[PREENCHER/i.test(name));
+
+  const items = cleanBrands.length > 0 ? cleanBrands : FALLBACK_SKILLS;
   const seq = [...items, ...items, ...items];
 
   const list = (dup: boolean) => (
-    <ul data-dup={dup ? '' : undefined} aria-hidden={dup || undefined} className="flex shrink-0 items-center">
+    <ul
+      data-dup={dup ? '' : undefined}
+      aria-hidden={dup || undefined}
+      className="flex shrink-0 items-center"
+      data-css-marquee-list
+    >
       {seq.map((text, i) => {
         const repeated = !dup && i >= items.length;
         return (
@@ -25,11 +33,14 @@ export function BrandStrip({ brands }: { brands?: Brand[] }) {
             key={`${text}-${i}`}
             aria-hidden={repeated || undefined}
             data-dup={repeated ? '' : undefined}
-            className="flex items-center gap-3.5 px-6 font-display text-[15px] font-semibold uppercase tracking-[0.08em] text-white/85 transition-colors hover:text-white md:px-10 md:text-[16px]"
+            className="flex items-center gap-4 px-5 font-kicker text-[14px] leading-none font-normal text-paragon-black uppercase md:px-7 md:text-[15px]"
           >
-            <span aria-hidden className="inline-block size-1.5 rotate-45 bg-zinc-400/80 shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
-            <span className="whitespace-nowrap">
-              {text}
+            <span aria-hidden="true" className="text-paragon-red">
+              ✦
+            </span>
+            <span className="whitespace-nowrap">{text}</span>
+            <span aria-hidden="true" className="text-paragon-black/40">
+              //
             </span>
           </li>
         );
@@ -38,10 +49,11 @@ export function BrandStrip({ brands }: { brands?: Brand[] }) {
   );
 
   return (
-    <section aria-label="Especialidades e Direção" className="marquee-host overflow-hidden border-y border-white/10 bg-[#0c0c0e] py-[22px] shadow-2xl relative">
-      {/* Textura sutil de fundo preto profundo */}
-      <div className="absolute inset-0 pointer-events-none opacity-30 bg-[linear-gradient(to_right,#000_0%,transparent_15%,transparent_85%,#000_100%)] z-10" />
-      <div className="marquee" style={{ ['--marquee-duration' as string]: '32s' }}>
+    <section
+      aria-label="Marcas e clientes atendidos"
+      className="marquee-host relative overflow-hidden border-y border-paragon-black bg-paragon-white py-3.5 text-paragon-black"
+    >
+      <div className="flex w-max items-center">
         {list(false)}
         {list(true)}
       </div>

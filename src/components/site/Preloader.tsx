@@ -3,87 +3,109 @@
 import { useEffect, useState } from 'react';
 import { soundEngine } from './ambient-audio';
 
-// Palavras que emergem do chão de forma sequencial e elegante
-const WORDS = [
-  { text: 'SOU', highlight: false, delay: 60 },
-  { text: 'BARBAROTTI', highlight: true, delay: 220 },
-];
+const STORAGE_KEY = 'hasPageLoaded';
 
 export function Preloader() {
-  const [mounted, setMounted] = useState(false);
-  const [exiting, setExiting] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [phase, setPhase] = useState<'dark' | 'light' | 'collapse' | 'done'>('dark');
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setPhase('done');
+      return;
+    }
+
+    const alreadyLoaded = sessionStorage.getItem(STORAGE_KEY) === 'true';
     document.body.style.overflow = 'hidden';
 
-    // Dispara a subida do chão com curva suave
-    const tMount = setTimeout(() => {
-      setMounted(true);
-    }, 70);
+    let t1: ReturnType<typeof setTimeout>;
+    let t2: ReturnType<typeof setTimeout>;
+    let t3: ReturnType<typeof setTimeout>;
 
-    // Tempo de exibição e saída suave
-    const tExit = setTimeout(() => handleExit(), 2400);
+    if (alreadyLoaded) {
+      setPhase('light');
+      t2 = setTimeout(() => setPhase('collapse'), 200);
+      t3 = setTimeout(() => {
+        setPhase('done');
+        document.body.style.overflow = '';
+      }, 850);
+    } else {
+      sessionStorage.setItem(STORAGE_KEY, 'true');
+      t1 = setTimeout(() => setPhase('light'), 950);
+      t2 = setTimeout(() => {
+        setPhase('collapse');
+        soundEngine?.playSubtleAreaSfx();
+      }, 1450);
+      t3 = setTimeout(() => {
+        setPhase('done');
+        document.body.style.overflow = '';
+      }, 2350);
+    }
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') handleExit();
+      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+        setPhase('collapse');
+        setTimeout(() => {
+          setPhase('done');
+          document.body.style.overflow = '';
+        }, 650);
+      }
     };
     window.addEventListener('keydown', onKey);
 
     return () => {
-      clearTimeout(tMount);
-      clearTimeout(tExit);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
   }, []);
 
-  const handleExit = () => {
-    if (exiting) return;
-    setExiting(true);
+  if (phase === 'done') return null;
 
-    if (soundEngine) {
-      soundEngine.playSubtleAreaSfx();
-    }
-
-    setTimeout(() => {
-      setVisible(false);
-      document.body.style.overflow = '';
-    }, 600);
-  };
-
-  if (!visible) return null;
+  const isLight = phase === 'light' || phase === 'collapse';
+  const isCollapsing = phase === 'collapse';
 
   return (
     <aside
       aria-label="Carregando portfólio de Barbarotti"
-      onClick={handleExit}
-      className={`fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-white text-[#111114] cursor-pointer select-none transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] p-6 sm:p-10 ${
-        exiting ? 'opacity-0 scale-[0.98] filter blur-lg pointer-events-none' : 'opacity-100'
-      }`}
+      onClick={() => {
+        setPhase('collapse');
+        setTimeout(() => {
+          setPhase('done');
+          document.body.style.overflow = '';
+        }, 650);
+      }}
+      style={{
+        backgroundColor: isLight ? '#f8f8f8' : '#100f0f',
+        color: isLight ? '#100f0f' : '#f8f8f8',
+        transform: isCollapsing ? 'scaleY(0)' : 'scaleY(1)',
+        transformOrigin: 'top top',
+        transition:
+          'background-color 600ms cubic-bezier(0.55, 0.085, 0.68, 0.53), color 600ms cubic-bezier(0.55, 0.085, 0.68, 0.53), transform 850ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
+      className="fixed inset-0 z-[99999] flex cursor-pointer items-center justify-center overflow-hidden select-none"
     >
-      <div className="relative flex flex-col items-center justify-center text-center px-4 w-full">
-        {/* Cada palavra surge individualmente debaixo do chão com máscara de recorte */}
-        <h1 className="font-display text-[16vw] sm:text-[13vw] lg:text-[11vw] font-black uppercase tracking-[-0.04em] leading-[0.9] select-none text-black flex flex-wrap items-baseline justify-center gap-x-[0.25em]">
-          {WORDS.map((word) => (
-            <span key={word.text} className="inline-block overflow-hidden pb-[0.08em]">
-              <span
-                style={{
-                  willChange: 'transform, filter, opacity',
-                  transform: mounted ? 'translate3d(0, 0%, 0)' : 'translate3d(0, 115%, 0)',
-                  filter: mounted ? 'blur(0px)' : 'blur(16px)',
-                  opacity: mounted ? 1 : 0,
-                  transition: `transform 1050ms cubic-bezier(0.16, 1, 0.3, 1) ${word.delay}ms, filter 900ms cubic-bezier(0.16, 1, 0.3, 1) ${word.delay}ms, opacity 750ms ease ${word.delay}ms`,
-                }}
-                className={`inline-block origin-bottom ${word.highlight ? 'text-[#ff6a00]' : 'text-black'}`}
-              >
-                {word.text}
-              </span>
-            </span>
-          ))}
-        </h1>
+      <div
+        style={{
+          opacity: isCollapsing ? 0 : 1,
+          transform: isCollapsing ? 'translateY(-20%)' : 'translateY(0%)',
+          transition: 'opacity 450ms ease, transform 500ms cubic-bezier(0.55, 0.085, 0.68, 0.53)',
+        }}
+        className="flex flex-col items-center gap-3 px-6 text-center"
+      >
+        <div className="flex items-center border border-current">
+          <span className="bg-paragon-blue px-3 py-1.5 font-display text-[20px] font-bold tracking-tight text-paragon-black uppercase">
+            SB
+          </span>
+          <span className="px-4 py-1.5 font-kicker text-[13px] tracking-[0.04em] uppercase">
+            SOUBARBAROTTI // DIREÇÃO &amp; IA
+          </span>
+        </div>
+        <p className="font-display text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.92] font-medium uppercase">
+          SOUBARBAROTTI
+        </p>
       </div>
     </aside>
   );
 }
-

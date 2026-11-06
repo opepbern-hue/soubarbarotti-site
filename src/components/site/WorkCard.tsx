@@ -5,8 +5,6 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import type { ProjectCard } from '@/lib/content';
 import { isPortrait } from '@/lib/media-shared';
 import { AutoVideo } from './AutoVideo';
-import { Viewfinder } from './Hud';
-import { ArrowUpRight } from './icons';
 import { Fill } from './Text';
 
 export function timecode(sec: number): string {
@@ -17,7 +15,7 @@ export function timecode(sec: number): string {
   return `${hh}:${mm}:${ss}`;
 }
 
-/** Círculo "ver projeto" que segue o cursor com um pouco de atraso. */
+/** Cursor flutuante com interpolação linear speed = 0.15 (SCRIPT 10 da Paragon) */
 export function useCursorFollower(active: boolean, size: number) {
   const hostRef = useRef<HTMLElement | null>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -29,8 +27,8 @@ export function useCursorFollower(active: boolean, size: number) {
     if (!active) return;
     let raf = 0;
     const loop = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.22;
-      pos.current.y += (target.current.y - pos.current.y) * 0.22;
+      pos.current.x += (target.current.x - pos.current.x) * 0.15;
+      pos.current.y += (target.current.y - pos.current.y) * 0.15;
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${pos.current.x - size / 2}px, ${pos.current.y - size / 2}px, 0)`;
       }
@@ -56,12 +54,21 @@ export function useCursorFollower(active: boolean, size: number) {
   return { hostRef, dotRef, track };
 }
 
-/** Card de trabalho em tela cheia com HUD de câmera (home) */
-export function WorkCard({ project }: { project: ProjectCard }) {
+/** Card de projeto no formato arquitetônico da Paragon (featured-work_card) */
+export function WorkCard({
+  project,
+  index = 0,
+  className = '',
+}: {
+  project: ProjectCard;
+  index?: number;
+  className?: string;
+}) {
   const [hovering, setHovering] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
-  const { hostRef, dotRef, track } = useCursorFollower(hovering, 72);
+  const { hostRef, dotRef, track } = useCursorFollower(hovering, 84);
+  const portrait = isPortrait(project.media);
 
   const onMove = (e: PointerEvent) => {
     if (e.pointerType !== 'mouse') return;
@@ -69,74 +76,82 @@ export function WorkCard({ project }: { project: ProjectCard }) {
     if (!hovering) setHovering(true);
   };
 
+  const subLabel =
+    project.shortDescription && !/\[PREENCHER/i.test(project.shortDescription)
+      ? project.shortDescription
+      : project.category;
+
   return (
     <Link
       ref={(el) => {
         hostRef.current = el;
       }}
       href={`/portfolio/${project.slug}`}
-      className="on-video group relative block aspect-[350/620] overflow-hidden bg-carvao text-white md:aspect-[770/1060] lg:aspect-[1400/880]"
       onPointerMove={onMove}
       onPointerLeave={() => setHovering(false)}
+      className={`featured-work_card_content group relative flex flex-col justify-between bg-paragon-black p-4 text-paragon-white transition-colors duration-300 lg:p-6 ${className}`}
     >
-      <AutoVideo
-        media={project.media}
-        mode="hover"
-        hovering={hovering}
-        onTime={setTime}
-        onPlayingChange={setPlaying}
-        sizes="100vw"
-        // Card em pé no celular/tablet e deitado no desktop: o vídeo aparece inteiro quando o formato não bate
-        fit={isPortrait(project.media) ? 'object-cover lg:object-contain' : 'object-contain lg:object-cover'}
-        backdrop={isPortrait(project.media) ? 'hidden lg:block' : 'lg:hidden'}
-      />
-      <span
-        aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(20,14,10,.55)_0%,rgba(20,14,10,0)_32%,rgba(20,14,10,0)_68%,rgba(20,14,10,.45)_100%)]"
-      />
-      <Viewfinder className="inset-5 md:inset-[60px] lg:inset-20" />
+      {/* Quadro do Vídeo / Capa com proporção cinematográfica e enquadramento preservando o sujeito */}
+      <div className="featured-work_card_image relative aspect-[16/10] w-full overflow-hidden bg-paragon-grey-600">
+        <AutoVideo
+          media={project.media}
+          mode="hover"
+          hovering={hovering}
+          onTime={setTime}
+          onPlayingChange={setPlaying}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          fit={
+            portrait
+              ? 'object-cover object-[center_20%] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]'
+              : 'object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]'
+          }
+        />
 
-      <span className="absolute left-10 right-10 top-10 md:left-[100px] md:top-[100px] lg:left-[124px] lg:top-[104px]">
-        <h3 className="font-display text-[31px] font-semibold leading-none tracking-[-0.02em] md:text-[38px] lg:text-[48px]">
-          <Fill text={project.title} />
-        </h3>
-        <span className="mt-3 block font-display text-[14px] font-medium uppercase tracking-[0.05em] text-white/85">
-          <Fill text={project.category} />
+        {/* Timecode sutil no canto superior direito quando em reprodução */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute top-3 right-3 border border-paragon-white/25 bg-paragon-black/75 px-2 py-0.5 font-kicker text-[11px] text-paragon-white tabular-nums transition-opacity duration-300 ${
+            playing ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {timecode(time)}
         </span>
-      </span>
 
-      {project.media?.placeholder || !project.media ? (
-        <mark className="preencher absolute bottom-24 left-10 font-display text-[11px] uppercase md:bottom-auto md:left-auto md:right-[100px] md:top-[100px]">
-          [PREENCHER: vídeo do projeto]
-        </mark>
-      ) : null}
+        {/* Índice numérico discreto no canto superior esquerdo */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-3 left-3 border border-paragon-white/25 bg-paragon-black/75 px-2 py-0.5 font-kicker text-[11px] text-paragon-white/80"
+        >
+          [{String(index + 1).padStart(2, '0')}]
+        </span>
 
-      <span
-        aria-hidden
-        className={`absolute bottom-9 left-10 flex items-center gap-2 font-display text-[13px] font-medium tabular-nums tracking-[0.08em] transition-opacity duration-300 md:left-1/2 md:-translate-x-1/2 lg:bottom-[92px] ${
-          playing ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <span>{timecode(time)}</span>
-      </span>
+        {/* Cursor flutuante estilo Paragon (STYLE 10: .custom-cursor_icon) */}
+        <span
+          ref={dotRef}
+          aria-hidden
+          className={`pointer-events-none absolute top-0 left-0 z-20 hidden h-[36px] min-w-[84px] place-items-center border border-paragon-black bg-paragon-red px-3 font-kicker text-[12px] leading-none font-medium text-paragon-black uppercase transition-[opacity,transform] duration-300 [@media(hover:hover)]:grid ${
+            hovering ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+          }`}
+        >
+          <span>Assistir ↗</span>
+        </span>
+      </div>
 
-      {/* Toque: seta fixa no canto · Mouse: círculo que segue o cursor */}
-      <span
-        aria-hidden
-        className="absolute bottom-7 right-7 grid size-14 place-items-center rounded-full bg-white text-black shadow-xl [@media(hover:hover)]:hidden"
-      >
-        <ArrowUpRight className="size-6" />
-      </span>
-      <span
-        ref={dotRef}
-        aria-hidden
-        className={`pointer-events-none absolute left-0 top-0 hidden size-[72px] place-items-center rounded-full bg-white text-black shadow-xl transition-[opacity,scale] duration-300 [@media(hover:hover)]:grid ${
-          hovering ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
-        }`}
-      >
-        <ArrowUpRight className="size-7" />
-      </span>
-      <span className="sr-only">: ver projeto</span>
+      {/* Rodapé Arquitetônico do Card (Título 28px uppercase à esquerda, Categoria à direita, Cliente abaixo) */}
+      <div className="mt-4 flex flex-col gap-1.5 pt-1">
+        <div className="flex items-baseline justify-between gap-4">
+          <h3 className="text-paragon-h5 text-paragon-white transition-colors duration-300 group-hover:text-paragon-red">
+            <Fill text={project.title} />
+          </h3>
+          <span className="shrink-0 font-sans text-[14px] leading-[1.31] text-paragon-white/90 lg:text-[16px]">
+            <Fill text={project.category} />
+          </span>
+        </div>
+
+        <p className="line-clamp-1 font-sans text-[14px] leading-[1.31] text-paragon-grey-400 lg:text-[15px]">
+          <Fill text={subLabel} />
+        </p>
+      </div>
     </Link>
   );
 }

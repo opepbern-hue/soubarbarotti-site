@@ -4,21 +4,33 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { RollText } from './Hud';
-import { CloseIcon, InstagramIcon, MenuIcon } from './icons';
 
 export type NavItem = { label: string; href: string; section?: string };
 
+const TICKER_ITEMS = Array.from({ length: 6 }, () => 'SOUBARBAROTTI // DIREÇÃO & IA //');
+
 export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string }) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const lastScrollY = useRef(0);
 
+  // Reação à direção do scroll (SCRIPT 9 da Paragon: initNavScrollHide)
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY <= 64) {
+        setHidden(false);
+      } else if (currentY > lastScrollY.current + 6) {
+        setHidden(true);
+      } else if (currentY < lastScrollY.current - 6) {
+        setHidden(false);
+      }
+      lastScrollY.current = currentY;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -83,158 +95,275 @@ export function Header({ items, ctaLabel }: { items: NavItem[]; ctaLabel: string
       ? active === `#${item.section}`
       : active === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
+  // No menu mobile incluímos também o link direto de Contato como na Paragon
+  const mobileLinks: NavItem[] = [
+    ...items,
+    ...(items.some((i) => i.href === '/#contato') ? [] : [{ label: 'Contato', href: '/#contato', section: 'contato' }]),
+  ];
+
   return (
-    <>
+    <div data-navigation-status={open ? 'active' : 'not-active'}>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,padding,box-shadow,border-color] duration-300 ${
-          scrolled || open
-            ? 'bg-black/90 border-b border-white/10 py-4 shadow-2xl'
-            : 'bg-transparent py-6 sm:py-8'
-        }`}
+        style={{
+          transform: hidden && !open ? 'translate3d(0, -130%, 0)' : 'translate3d(0, 0, 0)',
+          opacity: hidden && !open ? 0 : 1,
+          transition:
+            'transform 300ms cubic-bezier(0.55, 0.085, 0.68, 0.53), opacity 300ms cubic-bezier(0.55, 0.085, 0.68, 0.53)',
+        }}
+        className="fixed inset-x-0 top-[16px] z-50 lg:top-[24px]"
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-10 lg:px-12">
-          {/* Logo Estilo Minimalista / Moderno */}
-          <Link
-            href="/"
-            className="font-display text-[18px] sm:text-[20px] font-bold tracking-tight uppercase text-white transition-opacity hover:opacity-85"
-            aria-label="Barbarotti: início"
-          >
-            BARBAROTTI
-          </Link>
-
-          {/* Navegação Central Desktop */}
-          <nav aria-label="Principal" className="hidden lg:block absolute left-1/2 -translate-x-1/2">
-            <ul className="flex items-center gap-8">
-              {items.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={isActive(item) ? 'true' : undefined}
-                    className={`font-display text-[13px] font-medium tracking-wide transition-colors hover:text-white ${
-                      isActive(item) ? 'text-white font-semibold' : 'text-zinc-400'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Container de Botões no Menu (Instagram + Fale comigo) */}
-          <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/20 bg-black/70 p-1 shadow-lg">
-            <a
-              href="https://instagram.com/soubarbarotti"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram @soubarbarotti"
-              className="group flex h-9 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 font-display text-[12px] font-semibold uppercase tracking-wider text-white transition-all hover:bg-white/20 hover:border-white/30"
-            >
-              <InstagramIcon className="size-3.5 text-white transition-transform group-hover:scale-110" />
-              <span>Instagram</span>
-            </a>
-            <Link
-              href="/#contato"
-              aria-label="Fale comigo"
-              className="roll-host flex h-9 items-center rounded-full bg-white px-5 font-display text-[12px] font-bold uppercase text-black shadow-md transition-all hover:bg-zinc-200 active:scale-95"
-            >
-              <RollText text="Fale comigo" />
-            </Link>
-          </div>
-
-          {/* Botão Hambúrguer Mobile */}
-          <button
-            ref={toggleRef}
-            type="button"
-            className="grid size-10 place-items-center rounded-lg border border-white/20 bg-black/60 text-white transition-all hover:bg-zinc-900 active:scale-95 lg:hidden"
-            aria-expanded={open}
-            aria-controls="menu-celular"
-            aria-label={open ? 'Fechar menu' : 'Abrir menu'}
-            onClick={() => setOpen((o) => !o)}
-          >
-            {open ? <CloseIcon className="size-5 text-white" /> : <MenuIcon className="size-5 text-white" />}
-          </button>
-        </div>
-
-        {/* Menu Suspenso Mobile */}
-        <div
-          id="menu-celular"
-          ref={panelRef}
-          className={`relative overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${
-            open
-              ? 'max-h-[calc(100vh-5rem)] border-t border-white/10 bg-black/95 opacity-100 shadow-2xl'
-              : 'max-h-0 border-t-0 opacity-0'
-          }`}
-        >
-          <div className="relative z-10 space-y-6 px-6 pt-5 pb-8 text-white">
-            <nav aria-label="Menu Mobile">
-              <ul className="flex flex-col space-y-2">
-                {items.map((item) => {
-                  const activeItem = isActive(item);
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        aria-current={activeItem ? 'true' : undefined}
-                        className={`flex h-12 items-center justify-between rounded-xl px-4 font-display text-[15px] font-semibold uppercase tracking-tight transition-all ${
-                          activeItem
-                            ? 'border border-white/20 bg-zinc-900 text-white'
-                            : 'text-zinc-400 hover:bg-zinc-900/60 active:bg-zinc-800'
+        <div className="paragon-container">
+          {/* Desktop Navbar (2 grupos arquitetônicos com borda 1px solid #100f0f e altura 48px) */}
+          <div className="hidden h-[48px] items-stretch justify-between lg:flex">
+            {/* Grupo Esquerdo: Logo Sky Blue + Links em células #f8f8f8 */}
+            <div className="flex items-stretch border border-paragon-black bg-paragon-white text-paragon-black">
+              <Link
+                href="/"
+                aria-label="Barbarotti: início"
+                className="grid w-[52px] place-items-center border-r border-paragon-black bg-paragon-blue text-paragon-black transition-colors duration-300 hover:bg-paragon-blue-light"
+              >
+                <ParagonMarkIcon className="size-6" />
+              </Link>
+              <nav aria-label="Principal" className="flex items-stretch">
+                <ul className="flex items-stretch">
+                  {items.map((item, idx) => {
+                    const current = isActive(item);
+                    return (
+                      <li
+                        key={item.href}
+                        className={`flex items-stretch ${
+                          idx < items.length - 1 ? 'border-r border-paragon-black' : ''
                         }`}
                       >
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+                        <Link
+                          href={item.href}
+                          aria-current={current ? 'true' : undefined}
+                          className={`nav_menu_link flex items-center px-4 font-kicker text-[14px] leading-none font-normal uppercase transition-colors duration-300 xl:px-5 xl:text-[15px] ${
+                            current
+                              ? 'bg-paragon-grey-400 text-paragon-black'
+                              : 'bg-paragon-white text-paragon-black hover:bg-paragon-grey-300'
+                          }`}
+                        >
+                          <RollText text={item.label} />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </div>
 
-            {/* CTA Mobile: Container com Instagram e Fale Comigo */}
-            <div className="pt-2 flex flex-col gap-2 rounded-2xl border border-white/10 bg-zinc-950 p-2">
-              <a
-                href="https://instagram.com/soubarbarotti"
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 font-display text-[13px] font-semibold uppercase tracking-wider text-white transition-colors hover:bg-white/20"
+            {/* Grupo Direito: Marquee Contínuo + Botão Sky Blue "Fale comigo ↳" */}
+            <div className="flex items-stretch border border-paragon-black bg-paragon-white text-paragon-black">
+              <div
+                aria-hidden="true"
+                className="flex w-[220px] items-center overflow-hidden border-r border-paragon-black bg-paragon-white text-paragon-black xl:w-[288px]"
               >
-                <InstagramIcon className="size-4 text-white" />
-                <span>Instagram (@soubarbarotti)</span>
-              </a>
+                <div className="flex shrink-0 items-center whitespace-nowrap" data-nav-marquee-list>
+                  {TICKER_ITEMS.map((t, i) => (
+                    <span key={i} className="px-2 font-sans text-[14px] leading-none font-normal uppercase">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex shrink-0 items-center whitespace-nowrap" data-nav-marquee-list>
+                  {TICKER_ITEMS.map((t, i) => (
+                    <span key={`dup-${i}`} className="px-2 font-sans text-[14px] leading-none font-normal uppercase">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <Link
                 href="/#contato"
-                onClick={() => setOpen(false)}
-                aria-label="Fale comigo"
-                className="roll-host flex h-11 w-full items-center justify-center rounded-xl bg-white font-display text-[13px] font-bold uppercase text-black shadow-lg transition-transform active:scale-[0.98]"
+                aria-label={ctaLabel}
+                className="roll-host flex items-center gap-2.5 bg-paragon-blue px-4 font-kicker text-[14px] leading-none font-normal text-paragon-black uppercase transition-colors duration-300 hover:bg-paragon-grey-300 xl:px-5 xl:text-[15px]"
               >
-                <RollText text="Fale comigo" />
+                <RollText text={ctaLabel} />
+                <CornerArrowIcon className="size-3.5 shrink-0" />
               </Link>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs text-zinc-400">
-              <span className="font-medium">@soubarbarotti</span>
-              <a
-                href="https://instagram.com/soubarbarotti"
-                target="_blank"
-                rel="noreferrer"
-                className="font-bold text-white transition-colors hover:text-zinc-300"
-              >
-                Instagram ↗
-              </a>
+          {/* Mobile Navbar (Barra única de 3 células: Logo 48x48 | Marquee | Toggle 52x48) */}
+          <div className="flex h-[48px] w-full items-stretch border border-paragon-black bg-paragon-white text-paragon-black lg:hidden">
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              aria-label="Barbarotti: início"
+              className="grid w-[48px] shrink-0 place-items-center border-r border-paragon-black bg-paragon-blue text-paragon-black"
+            >
+              <ParagonMarkIcon className="size-5" />
+            </Link>
+
+            <div aria-hidden="true" className="flex min-w-0 flex-1 items-center overflow-hidden bg-paragon-white px-1">
+              <div className="flex shrink-0 items-center whitespace-nowrap" data-nav-marquee-list>
+                {TICKER_ITEMS.map((t, i) => (
+                  <span key={i} className="px-1.5 font-sans text-[13.5px] leading-none text-paragon-black uppercase">
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <div className="flex shrink-0 items-center whitespace-nowrap" data-nav-marquee-list>
+                {TICKER_ITEMS.map((t, i) => (
+                  <span
+                    key={`mdup-${i}`}
+                    className="px-1.5 font-sans text-[13.5px] leading-none text-paragon-black uppercase"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
+
+            <button
+              ref={toggleRef}
+              type="button"
+              aria-expanded={open}
+              aria-controls="menu-celular"
+              aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+              onClick={() => setOpen((o) => !o)}
+              className={`grid w-[52px] shrink-0 place-items-center border-l border-paragon-black transition-colors duration-300 ${
+                open ? 'bg-paragon-blue-light' : 'bg-paragon-blue'
+              }`}
+            >
+              <span className="relative flex w-[22px] flex-col items-end gap-[5.5px]">
+                <span
+                  style={{
+                    transform: open ? 'translateY(7.5px)' : 'translateY(0)',
+                    transition: 'transform 350ms cubic-bezier(0.65, 0.05, 0, 1)',
+                  }}
+                  className="block h-[2px] w-full bg-paragon-black"
+                />
+                <span className="block h-[2px] w-full bg-paragon-black" />
+                <span
+                  style={{
+                    transform: open ? 'translateY(-7.5px)' : 'translateY(0)',
+                    width: open ? '100%' : '72%',
+                    transition:
+                      'transform 350ms cubic-bezier(0.65, 0.05, 0, 1), width 350ms cubic-bezier(0.65, 0.05, 0, 1)',
+                  }}
+                  className="block h-[2px] bg-paragon-black"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Overlay escuro ao abrir o menu mobile */}
-      {open && (
-        <div
-          className="fixed inset-0 top-20 z-40 bg-black/70 transition-opacity duration-300 lg:hidden"
-          onClick={() => setOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-    </>
+      {/* Menu Mobile Full-Screen (#100f0f, Links 50.125px uppercase, Rodapé com redes sublinhadas) */}
+      <div
+        id="menu-celular"
+        ref={panelRef}
+        aria-hidden={!open}
+        style={{
+          opacity: open ? 1 : 0,
+          visibility: open ? 'visible' : 'hidden',
+          transition: open
+            ? 'opacity 500ms cubic-bezier(0.5, 0.5, 0, 1), visibility 0ms'
+            : 'opacity 450ms cubic-bezier(0.5, 0.5, 0, 1) 250ms, visibility 0ms 700ms',
+        }}
+        className="fixed inset-0 z-40 flex flex-col justify-between bg-paragon-black px-[var(--site-margin)] pt-[104px] pb-8 text-paragon-white lg:hidden"
+      >
+        <nav aria-label="Menu Mobile">
+          <ul className="flex flex-col gap-1">
+            {mobileLinks.map((item, idx) => {
+              const activeItem = isActive(item);
+              return (
+                <li key={item.href} className="overflow-hidden">
+                  <div
+                    style={{
+                      transform: open ? 'translate3d(0, 0%, 0)' : 'translate3d(0, 120%, 0)',
+                      transition: `transform 550ms cubic-bezier(0.65, 0, 0, 1) ${open ? 140 + idx * 50 : 0}ms`,
+                    }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      aria-current={activeItem ? 'true' : undefined}
+                      className={`nav_mobile_link inline-block font-kicker text-[clamp(2.5rem,12.8vw,3.133rem)] leading-[1.1] font-normal uppercase transition-colors ${
+                        activeItem ? 'text-paragon-red' : 'text-paragon-white hover:text-paragon-red'
+                      }`}
+                    >
+                      <RollText text={item.label} />
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="overflow-hidden pt-6">
+          <ul
+            style={{
+              transform: open ? 'translate3d(0, 0%, 0)' : 'translate3d(0, 120%, 0)',
+              transition: `transform 650ms cubic-bezier(0.65, 0, 0, 1) ${open ? 300 : 0}ms`,
+            }}
+            className="flex flex-wrap items-center gap-6"
+          >
+            <li>
+              <a
+                href="https://www.instagram.com/soubarbarotti/"
+                target="_blank"
+                rel="noreferrer"
+                className="u-text-button text-paragon-kicker text-paragon-white"
+              >
+                <RollText text="Instagram" />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://wa.me/5548999924405"
+                target="_blank"
+                rel="noreferrer"
+                className="u-text-button text-paragon-kicker text-paragon-white"
+              >
+                <RollText text="WhatsApp" />
+              </a>
+            </li>
+            <li>
+              <a
+                href="mailto:contato@soubarbarotti.com.br"
+                className="u-text-button text-paragon-kicker text-paragon-white"
+              >
+                <RollText text="E-mail" />
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Emblema geométrico da marca (substitui o ícone da Paragon na célula #44b6fd) */
+function ParagonMarkIcon({ className = 'size-6' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 28 28" fill="none" className={className} aria-hidden="true">
+      <rect x="2.5" y="4.5" width="23" height="19" rx="9.5" stroke="currentColor" strokeWidth="2.2" />
+      <path
+        d="M9 14h10M15 10l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
+/** Seta técnica em ângulo reto (↳) idêntica ao botão CONTACT US da Paragon */
+export function CornerArrowIcon({ className = 'size-3.5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M2.5 2v7.5h8.5M7.5 6l3.5 3.5L7.5 13"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="square"
+      />
+    </svg>
   );
 }

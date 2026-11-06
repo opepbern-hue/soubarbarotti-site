@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { getSections, getSettings } from '@/lib/content';
 import { globalJsonLd } from '@/lib/seo';
+import { AmbientSoundWidget } from './AmbientSoundWidget';
 import { Footer } from './Footer';
 import { Header, type NavItem } from './Header';
 import { JsonLd } from './JsonLd';
 import { Preloader } from './Preloader';
-import { AmbientSoundWidget } from './AmbientSoundWidget';
 import { SmoothScroll } from './SmoothScroll';
 
 export async function navItems(): Promise<NavItem[]> {
@@ -14,6 +14,7 @@ export async function navItems(): Promise<NavItem[]> {
   const items: NavItem[] = [{ label: 'Portfólio', href: '/portfolio' }];
   if (on('processo')) items.push({ label: 'Processo', href: '/#processo', section: 'processo' });
   if (on('sobre')) items.push({ label: 'Sobre', href: '/#sobre', section: 'sobre' });
+  items.push({ label: 'Fotos', href: '/fotos' });
   if (on('contato')) items.push({ label: 'Contato', href: '/#contato', section: 'contato' });
   return items;
 }
@@ -24,6 +25,8 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <JsonLd data={globalJsonLd(settings)} />
+      <Preloader />
+      <AmbientSoundWidget />
       <SmoothScroll />
       <Header items={items} ctaLabel="Fale comigo" />
       <main id="conteudo" tabIndex={-1} className="outline-none">

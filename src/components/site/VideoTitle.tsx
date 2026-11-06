@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react';
 import type { MediaView } from '@/lib/media';
-import { AutoVideo } from './AutoVideo';
 
-/**
- * "SOUBARBAROTTI." com o vídeo dentro das letras.
- * Camada 1: vídeo · Camada 2: branco com letras pretas em `screen` (o preto vira janela para o vídeo)
- * Camada 3: letras transparentes e o ponto final laranja piscando (o ponto do REC).
- * No celular quebra em "SOU / BARBAROTTI."
- */
 export function VideoTitle({
-  media,
-  priority = false,
   className = '',
   barbarottiClassName = '',
 }: {
@@ -29,8 +20,8 @@ export function VideoTitle({
   );
   return (
     <span aria-hidden className={`fit-host block select-none ${className}`}>
-      <span className="fit-title relative isolate block text-white font-bold tracking-tight">
-        {word(<span className="text-[#ff6a00]">.</span>)}
+      <span className="fit-title relative isolate block font-bold tracking-tight text-paragon-white uppercase">
+        {word(<span className="text-paragon-red">.</span>)}
       </span>
     </span>
   );

@@ -7,22 +7,26 @@ import { PlayIcon } from './icons';
 import { Picture } from './Picture';
 
 /**
- * Vídeo completo do projeto. Nada é baixado até o clique:
- * - arquivo próprio: <video> com capa e controles, com som
- * - YouTube/Vimeo: mostra só a capa e carrega o player no clique
+ * Vídeo completo do projeto com som no clique (nunca exibe [PREENCHER]).
  */
-export function FullVideo({ media, url, cover, title }: { media: MediaView | null; url: string; cover: MediaView | null; title: string }) {
+export function FullVideo({
+  media,
+  url,
+  cover,
+  title,
+}: {
+  media: MediaView | null;
+  url: string;
+  cover: MediaView | null;
+  title: string;
+}) {
   const [started, setStarted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const embed = !media?.video?.full ? parseEmbed(url) : null;
   const poster = media?.img ? media : cover;
 
   if (!media?.video?.full && !embed) {
-    return (
-      <div className="grid aspect-video w-full place-items-center bg-nevoa ring-1 ring-linha">
-        <mark className="preencher font-display text-[12px] uppercase">[PREENCHER: vídeo completo (arquivo ou link do YouTube/Vimeo)]</mark>
-      </div>
-    );
+    return null;
   }
 
   const start = () => {
@@ -31,7 +35,7 @@ export function FullVideo({ media, url, cover, title }: { media: MediaView | nul
   };
 
   return (
-    <div className="on-video relative aspect-video w-full overflow-hidden bg-carvao">
+    <div className="on-video relative aspect-video w-full overflow-hidden border border-paragon-white/22 bg-paragon-black">
       {media?.video?.full ? (
         <video
           ref={videoRef}
@@ -57,21 +61,32 @@ export function FullVideo({ media, url, cover, title }: { media: MediaView | nul
           allowFullScreen
         />
       ) : poster?.img ? (
-        <Picture media={poster} alt="" sizes="(min-width: 1200px) 1160px, 100vw" className="absolute inset-0 h-full w-full object-cover" />
+        <Picture
+          media={poster}
+          alt=""
+          sizes="(min-width: 1200px) 1160px, 100vw"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       ) : embed?.provider === 'youtube' ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={`https://i.ytimg.com/vi/${embed.id}/hqdefault.jpg`} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={`https://i.ytimg.com/vi/${embed.id}/hqdefault.jpg`}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       ) : null}
 
       {!started ? (
         <button
           type="button"
           onClick={start}
-          className="absolute inset-0 grid place-items-center bg-carvao/10 transition-colors hover:bg-carvao/0"
+          className="absolute inset-0 grid place-items-center bg-paragon-black/30 transition-colors hover:bg-paragon-black/10"
           aria-label={`Assistir ao vídeo completo: ${title}`}
         >
-          <span className="grid size-[76px] place-items-center rounded-full bg-branco-tela text-carvao shadow-lg transition-transform duration-300 hover:scale-105 md:size-[88px]">
-            <PlayIcon className="ml-1 size-7" />
+          <span className="u-button u-button--red">
+            <PlayIcon className="size-4" />
+            <span>Reproduzir com som</span>
           </span>
         </button>
       ) : null}

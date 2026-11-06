@@ -1,20 +1,20 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { About } from '@/components/site/About';
 import { BrandStrip } from '@/components/site/BrandStrip';
 import { Contact } from '@/components/site/Contact';
 import { Faq } from '@/components/site/Faq';
 import { Hero } from '@/components/site/Hero';
-import { Container, RecLabel, SectionHeading } from '@/components/site/Hud';
-import { ArrowUpRight } from '@/components/site/icons';
+import { Container } from '@/components/site/Hud';
 import { NumbersPhrase } from '@/components/site/NumbersPhrase';
 import { Plans } from '@/components/site/Plans';
 import { ProcessList } from '@/components/site/ProcessList';
+import { ScrollReveal, SplitText } from '@/components/site/ScrollReveal';
 import { Testimonials } from '@/components/site/Testimonials';
 import { WorksSection } from '@/components/site/WorksSection';
 import {
   getBrands,
   getFaqs,
+  getPhotos,
   getPlans,
   getProcessSteps,
   getProjects,
@@ -48,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const empty: SectionView = { key: '', enabled: true, label: '', titleLine1: '', titleLine2: '', intro: '' };
 
 export default async function HomePage() {
-  const [settings, sections, brands, featured, steps, plans, testimonials, faqs] = await Promise.all([
+  const [settings, sections, brands, featured, steps, plans, testimonials, faqs, photos] = await Promise.all([
     getSettings(),
     getSections(),
     getBrands(),
@@ -57,6 +57,7 @@ export default async function HomePage() {
     getPlans(),
     getTestimonials(),
     getFaqs(),
+    getPhotos('FOTO'),
   ]);
   const sec = (k: string) => sections[k] ?? { ...empty, key: k };
   const on = (k: string) => sec(k).enabled;
@@ -68,8 +69,13 @@ export default async function HomePage() {
       {on('marcas') ? <BrandStrip brands={brands} /> : null}
 
       {on('numeros') ? (
-        <section aria-label="Como eu trabalho" className="px-5 pb-[90px] pt-[110px] md:pt-[150px] lg:px-[100px] lg:pb-[150px] lg:pt-[175px]">
-          <NumbersPhrase text={settings.numbersUseCounters ? settings.numbersCounterText : settings.numbersPhrase} />
+        <section
+          aria-label="Como eu trabalho"
+          className="bg-paragon-white pt-[64px] pb-[48px] text-paragon-black lg:pt-[96px] lg:pb-[72px]"
+        >
+          <Container>
+            <NumbersPhrase text={settings.numbersUseCounters ? settings.numbersCounterText : settings.numbersPhrase} />
+          </Container>
         </section>
       ) : null}
 
@@ -78,15 +84,46 @@ export default async function HomePage() {
       ) : null}
 
       {on('processo') ? (
-        <section id="processo" className="scroll-mt-16 bg-amanhecer py-[80px] lg:py-[120px]">
+        <section
+          id="processo"
+          aria-label="Processo de produção"
+          className="scroll-mt-16 border-t border-paragon-black bg-paragon-white py-[72px] text-paragon-black lg:py-[110px]"
+        >
           <Container>
-            <SectionHeading label={sec('processo').label} line1={sec('processo').titleLine1} line2={sec('processo').titleLine2} intro={sec('processo').intro} />
+            {/* Cabeçalho de 3 colunas estilo WHAT WE DO / BUILT FOR THE CHASE da Paragon */}
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-3">
+                <p className="text-paragon-kicker text-paragon-black">
+                  {(sec('processo').label || '02 — MÉTODO').replace(/^\[|\]$/g, '')}
+                </p>
+              </div>
+              <div className="lg:col-span-6">
+                <h2 className="text-paragon-h2 text-paragon-black">
+                  <ScrollReveal as="span" delay={40}>
+                    <SplitText
+                      text={
+                        sec('processo').intro ||
+                        [sec('processo').titleLine1, sec('processo').titleLine2].filter(Boolean).join(' ')
+                      }
+                      speed="fast"
+                      mode="words"
+                    />
+                  </ScrollReveal>
+                </h2>
+              </div>
+              <div className="lg:col-span-3 lg:text-right">
+                <p className="text-paragon-kicker text-paragon-black">
+                  {[sec('processo').titleLine1, sec('processo').titleLine2].filter(Boolean).join(' ')}
+                </p>
+              </div>
+            </div>
+
             <ProcessList steps={steps} />
           </Container>
         </section>
       ) : null}
 
-      {on('sobre') ? <About section={sec('sobre')} settings={settings} /> : null}
+      {on('sobre') ? <About section={sec('sobre')} settings={settings} photos={photos} /> : null}
 
       {on('planos') ? <Plans section={sec('planos')} plans={plans} /> : null}
 

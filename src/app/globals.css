@@ -1,39 +1,67 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------
-   Paleta @soubarbarotti (fonte: paleta-soubarbarotti.md)
+   Sistema de Tokens — Direção Visual Paragon Productions
    ------------------------------------------------------------------ */
 :root {
-  /* Base - Cinema Black & Clean Neutral */
-  --branco-tela: #ffffff;
-  --nevoa: #f9f9fb;
-  --carvao: #0d0d10;
-  --fumaca: #71717a;
-  --linha: #e4e4e7;
+  /* Swatches Exatos da Paragon (:root) */
+  --paragon-black: #100f0f;
+  --paragon-white: #f8f8f8;
+  --paragon-red: #ff5b4b;
+  --paragon-blue: #44b6fd;
+  --paragon-blue-light: #88d4f5;
+  --paragon-teal: #508992;
+  --paragon-grey-50: #e6e9ea;
+  --paragon-grey-100: #d9d9d9;
+  --paragon-grey-300: #c8c8c8;
+  --paragon-grey-400: #9b9b9b;
+  --paragon-grey-500: #6d6c6c;
+  --paragon-grey-600: #2c2c2c;
 
-  /* Acentos Cinema (Preto & Grafite em vez de Laranja) */
-  --ambar: #27272a;
-  --laranja-barbarotti: #18181b;
-  --brasa: #09090b;
+  /* Mapeamento Semântico dos Tokens do Projeto para a Paleta Paragon */
+  --branco-tela: #f8f8f8;
+  --amanhecer: #f8f8f8;
+  --nevoa: #e6e9ea;
+  --carvao: #100f0f;
+  --fumaca: #6d6c6c;
+  --linha: #100f0f;
+  --linha-invert: rgba(248, 248, 248, 0.22);
 
-  /* Azul Céu */
-  --azul-ceu: #2b80e4;
-  --azul-ceu-light: #5da3f2;
-  --azul-ceu-glow: rgba(43, 128, 228, 0.35);
+  /* Acentos Paragon */
+  --ambar: #44b6fd;
+  --laranja-barbarotti: #ff5b4b;
+  --brasa: #ff5b4b;
+  --azul-ceu: #44b6fd;
+  --azul-ceu-light: #88d4f5;
+  --azul-ceu-glow: rgba(68, 182, 253, 0.35);
 
-  /* Gradientes & Texturas (Cinema Black & Neutral) */
-  --grad-golden-hour: linear-gradient(135deg, #27272a 0%, #18181b 50%, #09090b 100%);
-  --grad-amanhecer: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
+  /* Gradientes & Superfícies */
+  --grad-golden-hour: linear-gradient(135deg, #100f0f 0%, #1c1b1b 100%);
+  --grad-amanhecer: linear-gradient(180deg, #f8f8f8 0%, #e6e9ea 100%);
   --grad-light-leak: radial-gradient(
     ellipse 75% 100% at 85% 0%,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 45%,
+    rgba(248, 248, 248, 0.06) 0%,
+    rgba(248, 248, 248, 0.01) 45%,
     rgba(0, 0, 0, 0) 100%
   );
 
-  --header-h: 64px;
+  /* Grid, Container e Bordas Paragon */
+  --site-margin: clamp(1.125rem, 0.453rem + 2.865vw, 3rem); /* 18px mobile (390) → 48px desktop (1440) */
+  --site-gutter: clamp(1rem, 0.821rem + 0.764vw, 1.5rem); /* 16px mobile (390) → 24px desktop (1440) */
+  --border-main: 1px;
+  --header-h: 72px;
+
+  /* Timings e Easings Paragon */
+  --cubic-default: cubic-bezier(0.65, 0.05, 0, 1);
+  --cubic-button: cubic-bezier(0.625, 0.05, 0, 1);
+  --cubic-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-default: 0.5s;
+  --animation-default: var(--duration-default) var(--cubic-default);
+
+  interpolate-size: allow-keywords;
 }
 
+/* Tema do Painel Admin (intacto para /admin/**) */
 .admin-theme {
   --branco-tela: #131317;
   --nevoa: #1a1a21;
@@ -50,9 +78,10 @@
   color-scheme: dark;
 }
 
-/* Tokens do Tailwind lidos das variáveis acima (bg-nevoa, text-brasa, border-linha…) */
+/* Tokens expostos para o Tailwind v4 */
 @theme inline {
   --color-branco-tela: var(--branco-tela);
+  --color-amanhecer: var(--amanhecer);
   --color-nevoa: var(--nevoa);
   --color-carvao: var(--carvao);
   --color-fumaca: var(--fumaca);
@@ -63,13 +92,26 @@
   --color-azul-ceu: var(--azul-ceu);
   --color-azul-ceu-light: var(--azul-ceu-light);
 
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-paragon-black: var(--paragon-black);
+  --color-paragon-white: var(--paragon-white);
+  --color-paragon-red: var(--paragon-red);
+  --color-paragon-blue: var(--paragon-blue);
+  --color-paragon-blue-light: var(--paragon-blue-light);
+  --color-paragon-teal: var(--paragon-teal);
+  --color-paragon-grey-100: var(--paragon-grey-100);
+  --color-paragon-grey-300: var(--paragon-grey-300);
+  --color-paragon-grey-400: var(--paragon-grey-400);
+  --color-paragon-grey-500: var(--paragon-grey-500);
+  --color-paragon-grey-600: var(--paragon-grey-600);
 
+  --font-display: var(--font-barlow-condensed), Impact, ui-sans-serif, system-ui, sans-serif;
+  --font-kicker: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-space-grotesk), ui-monospace, SFMono-Regular, monospace;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  /* Os três tamanhos do Rushes: celular < 810 ≤ tablet < 1200 ≤ desktop */
   --breakpoint-md: 50.625rem;
-  --breakpoint-lg: 75rem;
+  --breakpoint-lg: 62rem;
+  --breakpoint-xl: 75rem;
 }
 
 @utility bg-golden-hour {
@@ -78,50 +120,59 @@
 @utility bg-amanhecer {
   background-image: var(--grad-amanhecer);
 }
-/* O Light Leak vai sempre por cima do branco */
 @utility bg-light-leak {
   background: var(--grad-light-leak), var(--branco-tela);
 }
 
-/* ------------------------------------------------------------------ */
-
+/* ------------------------------------------------------------------
+   Base & Reset Paragon
+   ------------------------------------------------------------------ */
 @layer base {
   html {
     scroll-behavior: smooth;
-    /* rolagem com inércia (Lenis) assume no desktop; o navegador não anima por cima */
+    &.lenis,
     &.lenis-smooth {
+      height: auto;
       scroll-behavior: auto;
     }
     scroll-padding-top: var(--header-h);
     -webkit-text-size-adjust: 100%;
   }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
   body {
-    background: var(--branco-tela);
-    color: var(--carvao);
+    background: var(--paragon-black);
+    color: var(--paragon-white);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     overflow-x: clip;
   }
+  body:has([data-navigation-status="active"]) {
+    overflow: hidden;
+  }
   ::selection {
-    background: #18181b;
-    color: #fff;
+    background: var(--paragon-red);
+    color: var(--paragon-black);
   }
   :focus-visible {
-    outline: 2px solid #52525b;
-    outline-offset: 3px;
-    border-radius: 2px;
-  }
-  .on-video :focus-visible,
-  .on-video:focus-visible {
-    outline-color: #fff;
+    outline: 2px solid var(--paragon-blue);
+    outline-offset: 2px;
   }
   button {
     cursor: pointer;
   }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
-/* Ocultar o selo/indicador dev do Next.js (overlay "N") */
+/* Ocultar indicador de dev do Next.js */
 [data-nextjs-toast],
 [data-nextjs-toast-wrapper],
 nextjs-portal,
@@ -136,154 +187,245 @@ div[class*="dev-indicator"] {
   pointer-events: none !important;
 }
 
-/* Ponto do REC (Vermelho de gravação de câmera) */
-.rec-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-  flex: none;
-  animation: rec-blink 1.6s steps(1, end) infinite;
-}
-.rec-blink {
-  animation: rec-blink 1.6s steps(1, end) infinite;
-}
-@keyframes rec-blink {
-  0%,
-  60% {
-    opacity: 1;
-  }
-  61%,
-  100% {
-    opacity: 0.15;
-  }
+/* ------------------------------------------------------------------
+   Escala Tipográfica Computada da Paragon (1440px Desktop / 390px Mobile)
+   ------------------------------------------------------------------ */
+.text-paragon-display {
+  font-family: var(--font-display);
+  font-size: clamp(3.75rem, 1.602rem + 9.166vw, 9.75rem); /* 60px → 156px */
+  line-height: 0.95;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
 }
 
-/* Animação ambiente suave dentro e atrás do menu suspenso */
-@keyframes ambient-pulse-move {
-  0% {
-    transform: translate(-10%, -10%) scale(1) rotate(0deg);
-    opacity: 0.35;
-  }
-  33% {
-    transform: translate(20%, 15%) scale(1.2) rotate(120deg);
-    opacity: 0.55;
-  }
-  66% {
-    transform: translate(-8%, 20%) scale(0.9) rotate(240deg);
-    opacity: 0.40;
-  }
-  100% {
-    transform: translate(-10%, -10%) scale(1) rotate(360deg);
-    opacity: 0.35;
-  }
+.text-paragon-h1-lg {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1.568rem + 6.111vw, 7rem); /* 48px → 112px */
+  line-height: 1;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
 }
 
-.animate-ambient-move {
-  animation: ambient-pulse-move 14s ease-in-out infinite alternate;
+.text-paragon-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.71875rem, 1.544rem + 5.01vw, 6rem); /* 43.5px → 96px */
+  line-height: 0.95;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
 }
 
-@keyframes ambient-glow-pulse {
-  0%, 100% {
-    opacity: 0.45;
-    filter: blur(24px);
-  }
-  50% {
-    opacity: 0.8;
-    filter: blur(36px);
-  }
+.text-paragon-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.981rem + 1.146vw, 3rem); /* 36px → 48px */
+  line-height: 1.1;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
 }
 
+.text-paragon-h3 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.821rem + 0.764vw, 2.5rem); /* 32px → 40px */
+  line-height: 1.1;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
+}
 
-.animate-glow-pulse {
-  animation: ambient-glow-pulse 6s ease-in-out infinite;
+.text-paragon-h4 {
+  font-family: var(--font-display);
+  font-size: clamp(1.765rem, 1.681rem + 0.359vw, 2rem); /* 28.25px → 32px */
+  line-height: 1.1;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
+}
+
+.text-paragon-h5 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.41rem + 0.382vw, 1.75rem); /* 24px → 28px */
+  line-height: 0.95;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
+}
+
+.text-paragon-h6 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1.16rem + 0.382vw, 1.5rem); /* 20px → 24px */
+  line-height: 1.31;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0em;
+}
+
+.text-paragon-kicker {
+  font-family: var(--font-kicker);
+  font-size: clamp(0.8828rem, 0.841rem + 0.179vw, 1rem); /* 14.125px → 16px */
+  line-height: 1.31;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0em;
+}
+
+.text-paragon-body {
+  font-family: var(--font-sans);
+  font-size: clamp(0.8828rem, 0.841rem + 0.179vw, 1rem); /* 14.125px → 16px */
+  line-height: 1.315;
+  font-weight: 400;
+  letter-spacing: 0em;
+}
+
+.text-paragon-small {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 0.705rem + 0.191vw, 0.875rem); /* 12px → 14px */
+  line-height: 1.31;
+  font-weight: 400;
+}
+
+/* Container com a margem exata da Paragon (--site-margin) */
+.paragon-container {
+  width: 100%;
+  padding-inline: var(--site-margin);
+  margin-inline: auto;
 }
 
 /* ------------------------------------------------------------------
-   Animações de Texto estilo Rushes (Framer Motion Text Reveal)
+   Botões & Sublinhados Animados da Paragon (STYLE 5 da Referência)
    ------------------------------------------------------------------ */
-.mask-clip {
-  display: inline-block;
+.u-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  font-family: var(--font-kicker);
+  font-size: clamp(0.8828rem, 0.841rem + 0.179vw, 1rem);
+  line-height: 1.2;
+  font-weight: 400;
+  text-transform: uppercase;
+  border: 1px solid var(--paragon-black);
+  border-radius: 0px;
+  padding: 0.75rem 1.25rem;
+  transition:
+    background-color var(--duration-default) var(--cubic-default),
+    color var(--duration-default) var(--cubic-default),
+    border-color var(--duration-default) var(--cubic-default);
+}
+
+.u-button--red {
+  background-color: var(--paragon-red);
+  color: var(--paragon-black);
+  border-color: var(--paragon-black);
+}
+.u-button--red:hover {
+  background-color: var(--paragon-grey-300);
+  color: var(--paragon-black);
+}
+
+.u-button--blue {
+  background-color: var(--paragon-blue);
+  color: var(--paragon-black);
+  border-color: var(--paragon-black);
+}
+.u-button--blue:hover {
+  background-color: var(--paragon-grey-300);
+  color: var(--paragon-black);
+}
+
+.u-button--white {
+  background-color: var(--paragon-white);
+  color: var(--paragon-black);
+  border-color: var(--paragon-black);
+}
+.u-button--white:hover {
+  background-color: var(--paragon-red);
+  color: var(--paragon-black);
+}
+
+.u-button--dark {
+  background-color: var(--paragon-black);
+  color: var(--paragon-white);
+  border-color: var(--paragon-white);
+}
+.u-button--dark:hover {
+  background-color: var(--paragon-red);
+  color: var(--paragon-black);
+  border-color: var(--paragon-black);
+}
+
+/* Animação vertical de texto nos botões e links da Paragon ([data-button-animate-chars]) */
+[data-button-animate-chars] {
   overflow: hidden;
-  vertical-align: top;
-  line-height: inherit;
-}
-
-.reveal-text {
+  position: relative;
   display: inline-block;
-  opacity: 0;
-  transform: translateY(115%);
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: var(--delay, 0ms);
-  will-change: transform, opacity;
+  vertical-align: bottom;
 }
 
-.reveal-text.is-revealed,
-.is-revealed .reveal-text,
-.is-revealed.reveal-text {
-  opacity: 1;
-  transform: translateY(0%);
-  will-change: auto;
-}
-
-/* ------------------------------------------------------------------
-   Animação de Revelação de Bloco / Card (Slide Up Rápido & Suave)
-   ------------------------------------------------------------------ */
-.reveal-box,
-.reveal-fade-up {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.45s ease;
-  transition-delay: var(--delay, 0ms);
-  will-change: transform, opacity;
-}
-
-.reveal-box.is-revealed,
-.is-revealed .reveal-box,
-.is-revealed.reveal-box,
-.reveal-fade-up.is-revealed,
-.is-revealed .reveal-fade-up,
-.is-revealed.reveal-fade-up {
-  opacity: 1;
-  transform: translateY(0);
-}
-/* Depois de revelado, libera a camada de GPU (centenas de camadas travam a rolagem) */
-.reveal-box.is-revealed,
-.reveal-fade-up.is-revealed {
-  will-change: auto;
-}
-
-/* ------------------------------------------------------------------
-   AnimeJS-Style SplitText (Caractere / Palavra Suave e Leve)
-   ------------------------------------------------------------------ */
-.split-char-mask {
+[data-button-animate-chars] > span {
   display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-  line-height: inherit;
+  position: relative;
+  text-shadow: 0px 1.3em currentColor;
+  transform: translateY(0em) rotate(0.001deg);
+  transition: transform 0.6s var(--cubic-button);
 }
 
-.split-char {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(100%);
-  will-change: transform, opacity;
-  transition: transform var(--duration, 0.5s) cubic-bezier(0.16, 1, 0.3, 1),
-              opacity var(--duration, 0.4s) ease;
-  transition-delay: var(--delay, 0ms);
+.u-button:hover [data-button-animate-chars] > span,
+.u-text-button:hover [data-button-animate-chars] > span,
+.nav_menu_link:hover [data-button-animate-chars] > span,
+.nav_mobile_link:hover [data-button-animate-chars] > span,
+.roll-host:hover [data-button-animate-chars] > span {
+  transform: translateY(-1.3em) rotate(0.001deg);
 }
 
-.is-revealed .split-char,
-.split-char.is-revealed {
-  opacity: 1;
-  transform: translateY(0%);
-  will-change: auto;
+/* Sublinhado duplo animado (.u-text-button da Paragon) */
+.u-text-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-kicker);
+  text-transform: uppercase;
+  padding-bottom: 0.2em;
 }
 
-/* Letras que rolam (botão "Fale comigo") */
+.u-text-button::before,
+.u-text-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0em;
+  left: 0;
+  width: 100%;
+  height: 0.0625em;
+  background-color: currentColor;
+  transition: transform 0.735s var(--cubic-button);
+  transition-delay: 0.3s;
+  transform-origin: left;
+  transform: scaleX(1) rotate(0.001deg);
+}
+
+.u-text-button::after {
+  transform-origin: right;
+  transform: scaleX(0) rotate(0.001deg);
+  transition-delay: 0s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .u-text-button:hover::before {
+    transform-origin: right;
+    transform: scaleX(0) rotate(0.001deg);
+    transition-delay: 0s;
+  }
+  .u-text-button:hover::after {
+    transform-origin: left;
+    transform: scaleX(1) rotate(0.001deg);
+    transition-delay: 0.3s;
+  }
+}
+
+/* Compatibilidade com RollText existente */
 .roll {
   display: inline-flex;
   white-space: pre;
@@ -297,8 +439,8 @@ div[class*="dev-indicator"] {
 }
 .roll-ch > span {
   display: block;
-  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-  transition-delay: calc(var(--i) * 22ms);
+  transition: transform 0.6s var(--cubic-button);
+  transition-delay: calc(var(--i) * 18ms);
 }
 @media (hover: hover) {
   .roll-host:hover .roll-ch > span {
@@ -310,11 +452,28 @@ div[class*="dev-indicator"] {
   transform: translateY(-100%);
 }
 
-/* Letreiro da faixa de marcas e dos créditos */
+/* ------------------------------------------------------------------
+   Marquees da Paragon (STYLE 6 e STYLE 11 da Referência)
+   ------------------------------------------------------------------ */
+@keyframes paragonTranslateX {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+[data-css-marquee-list] {
+  animation: paragonTranslateX 20s linear infinite;
+}
+
+[data-nav-marquee-list],
+[data-service-marquee-list] {
+  animation: paragonTranslateX 30s linear infinite;
+}
+
 .marquee {
   display: flex;
   width: max-content;
-  animation: marquee var(--marquee-duration, 40s) linear infinite;
+  animation: marquee var(--marquee-duration, 28s) linear infinite;
 }
 .marquee-host:hover .marquee {
   animation-play-state: paused;
@@ -325,82 +484,114 @@ div[class*="dev-indicator"] {
   }
 }
 
-/* Título gigante: o tamanho da fonte acompanha a largura do bloco (container query),
-   então o nome sempre encosta nas margens, sem passar delas */
+/* ------------------------------------------------------------------
+   Revelação de Linhas e Blocos (SplitText / Line Mask da Paragon)
+   ------------------------------------------------------------------ */
+.line-mask,
+.word-mask,
+.char-mask,
+.mask-clip,
+.split-char-mask {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  line-height: inherit;
+  padding-block: 0.125em;
+  margin-block: -0.125em;
+}
+
+.reveal-text,
+.split-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(110%);
+  transition:
+    transform var(--duration, 0.6s) var(--cubic-reveal),
+    opacity var(--duration, 0.5s) ease;
+  transition-delay: var(--delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.reveal-text.is-revealed,
+.is-revealed .reveal-text,
+.is-revealed.reveal-text,
+.is-revealed .split-char,
+.split-char.is-revealed {
+  opacity: 1;
+  transform: translateY(0%);
+  will-change: auto;
+}
+
+.reveal-box,
+.reveal-fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    transform 0.6s var(--cubic-reveal),
+    opacity 0.5s ease;
+  transition-delay: var(--delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.reveal-box.is-revealed,
+.is-revealed .reveal-box,
+.is-revealed.reveal-box,
+.reveal-fade-up.is-revealed,
+.is-revealed .reveal-fade-up,
+.is-revealed.reveal-fade-up {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
+}
+
+/* ------------------------------------------------------------------
+   Título Knockout / Fit-to-Width da Paragon (Hero Banner)
+   ------------------------------------------------------------------ */
 .fit-host {
   container-type: inline-size;
 }
 .fit-title {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
   line-height: 0.86;
+  text-transform: uppercase;
   white-space: nowrap;
-  /* celular: "SOU / BARBAROTTI." → a linha mais longa tem 6,65 em */
-  font-size: calc(100cqw / 6.72);
+  font-size: calc(100cqw / 6.1);
 }
 @media (min-width: 50.625rem) {
   .fit-title {
-    /* tablet e desktop: "SOUBARBAROTTI." numa linha → 8,62 em */
-    font-size: calc(100cqw / 8.7);
+    font-size: calc(100cqw / 6.35);
   }
 }
 
-/* Marca de conteúdo que falta: fica bem visível até ser preenchido no admin */
-.preencher {
-  background: var(--nevoa);
-  color: var(--brasa);
-  outline: 1px dashed var(--brasa);
-  outline-offset: -1px;
-  border-radius: 3px;
-  padding: 0 0.25em;
-  font-style: normal;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
-/* Cantos de visor (HUD de câmera) */
-.viewfinder > i {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  border-color: rgb(255 255 255 / 0.55);
-  border-style: solid;
-  border-width: 0;
-  pointer-events: none;
-}
-.viewfinder > i:nth-child(1) {
-  top: 0;
-  left: 0;
-  border-top-width: 1px;
-  border-left-width: 1px;
-}
-.viewfinder > i:nth-child(2) {
-  top: 0;
-  right: 0;
-  border-top-width: 1px;
-  border-right-width: 1px;
-}
-.viewfinder > i:nth-child(3) {
-  bottom: 0;
-  left: 0;
-  border-bottom-width: 1px;
-  border-left-width: 1px;
-}
-.viewfinder > i:nth-child(4) {
-  bottom: 0;
-  right: 0;
-  border-bottom-width: 1px;
-  border-right-width: 1px;
-}
-@media (max-width: 50.6rem) {
-  .viewfinder > i {
-    width: 48px;
-    height: 48px;
+/* ------------------------------------------------------------------
+   Galeria Polaroid Inclinada da Paragon (STYLE 14 da Referência)
+   ------------------------------------------------------------------ */
+@media screen and (min-width: 768px) {
+  .paragon-polaroid-item:nth-child(6n + 1) {
+    transform: rotate(8.78deg);
+  }
+  .paragon-polaroid-item:nth-child(6n + 2) {
+    transform: rotate(-11.5deg);
+  }
+  .paragon-polaroid-item:nth-child(6n + 3) {
+    transform: rotate(6.58deg);
+  }
+  .paragon-polaroid-item:nth-child(6n + 4) {
+    transform: rotate(-5.97deg);
+  }
+  .paragon-polaroid-item:nth-child(6n + 5) {
+    transform: rotate(12.2deg);
+  }
+  .paragon-polaroid-item:nth-child(6n + 6) {
+    transform: rotate(-8.2deg);
   }
 }
 
-/* Sanfona das perguntas */
+/* ------------------------------------------------------------------
+   Acordeão FAQ (<details>)
+   ------------------------------------------------------------------ */
 details > summary {
   list-style: none;
 }
@@ -412,11 +603,11 @@ details .faq-icon::after {
   content: '';
   position: absolute;
   inset: 50% auto auto 50%;
-  width: 9px;
-  height: 1.25px;
+  width: 11px;
+  height: 1.5px;
   background: currentColor;
   transform: translate(-50%, -50%);
-  transition: transform 0.3s ease;
+  transition: transform 0.35s var(--cubic-default);
 }
 details .faq-icon::after {
   transform: translate(-50%, -50%) rotate(90deg);
@@ -428,17 +619,16 @@ details::details-content {
   block-size: 0;
   overflow: hidden;
   transition:
-    block-size 0.35s ease,
-    content-visibility 0.35s allow-discrete;
+    block-size 0.4s var(--cubic-default),
+    content-visibility 0.4s allow-discrete;
 }
 details[open]::details-content {
   block-size: auto;
 }
-:root {
-  interpolate-size: allow-keywords;
-}
 
-/* Reduzir movimento: nada de loop, letreiro, contador ou letras animadas */
+/* ------------------------------------------------------------------
+   Acessibilidade: prefers-reduced-motion
+   ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -451,22 +641,21 @@ details[open]::details-content {
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
   }
-  .rec-dot,
-  .rec-blink {
-    animation: none;
-  }
+  [data-css-marquee-list],
+  [data-nav-marquee-list],
+  [data-service-marquee-list],
   .marquee {
-    animation: none;
-    flex-wrap: wrap;
-    width: auto;
-    justify-content: center;
+    animation: none !important;
   }
-  .marquee [data-dup] {
-    display: none;
+  .reveal-text,
+  .split-char,
+  .reveal-box,
+  .reveal-fade-up {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
-/* Vídeo em camada própria: cada quadro novo não repinta o texto e o HUD por cima */
 video {
   transform: translateZ(0);
   backface-visibility: hidden;

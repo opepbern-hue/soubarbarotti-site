@@ -1,125 +1,218 @@
 'use client';
 
-import { useState, type PointerEvent } from 'react';
+import { useState } from 'react';
 import type { ProcessStepView } from '@/lib/content';
+import { isPortrait } from '@/lib/media-shared';
 import { AutoVideo } from './AutoVideo';
-import { ScrollReveal, SplitText } from './ScrollReveal';
-import { useCursorFollower } from './WorkCard';
+import { Fill } from './Text';
+
+const PANEL_SWATCHES = [
+  'bg-paragon-blue-light text-paragon-black',
+  'bg-paragon-red text-paragon-black',
+  'bg-paragon-teal text-paragon-black',
+  'bg-paragon-white text-paragon-black',
+  'bg-paragon-grey-300 text-paragon-black',
+];
+
+function splitTools(tools: string): string[] {
+  if (!tools) return [];
+  return tools
+    .split(/[,·•|/]/)
+    .map((t) => t.replace(/\[PREENCHER[^\]]*\]/g, '').trim())
+    .filter(Boolean);
+}
 
 /**
- * Linhas numeradas do processo (layout da seção de serviços).
- * Mouse: as outras linhas suavizam e o vídeo da etapa flutua junto ao cursor.
- * Toque e clique: abre sanfona expandida com o vídeo em alta definição.
+ * Painéis horizontais expansíveis no desktop e empilhados no mobile,
+ * reproduzindo fielmente o componente `home-services_cards_wrap` da Paragon (STYLE 11).
  */
 export function ProcessList({ steps }: { steps: ProcessStepView[] }) {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const [open, setOpen] = useState<number | null>(null);
-  const { hostRef, dotRef, track } = useCursorFollower(hovered !== null, 0);
+  const [active, setActive] = useState<number>(0);
 
-  const onMove = (e: PointerEvent, i: number) => {
-    if (e.pointerType !== 'mouse') return;
-    track(e, hovered === null);
-    if (hovered !== i) setHovered(i);
-  };
+  if (!steps.length) return null;
 
   return (
-    <div
-      ref={(el) => {
-        hostRef.current = el;
-      }}
-      className="relative mt-[70px] lg:mt-[110px]"
-      onPointerLeave={() => setHovered(null)}
-    >
-      <ol>
-        {steps.map((s, i) => {
-          const dim = hovered !== null && hovered !== i;
-          const isHovered = hovered === i;
-          const isOpen = open === i;
+    <div className="mt-10 lg:mt-14">
+      {/* DESKTOP: Acordeão Horizontal Expansível (CREATIVE / PRODUCTION / POST da Paragon) */}
+      <div className="hidden h-[620px] w-full items-stretch border border-paragon-black lg:flex">
+        {steps.map((step, i) => {
+          const isActive = active === i;
+          const swatch = PANEL_SWATCHES[i % PANEL_SWATCHES.length];
+          const toolItems = splitTools(step.tools);
+          const portrait = isPortrait(step.media);
+          const marqueeItems = Array.from({ length: 6 }, () => `${step.title}`);
+
           return (
-            <li
-              key={s.id}
-              className="border-b border-linha/80 transition-colors hover:border-black/30"
-              onPointerEnter={(e) => onMove(e, i)}
-              onPointerMove={(e) => onMove(e, i)}
+            <div
+              key={step.id}
+              style={{
+                flex: isActive ? '1 1 0%' : '0 0 auto',
+                width: isActive ? 'auto' : '92px',
+                transition:
+                  'flex 550ms cubic-bezier(0.65, 0.05, 0, 1), width 550ms cubic-bezier(0.65, 0.05, 0, 1)',
+              }}
+              className={`home-services_cards_item relative flex h-full min-w-0 overflow-hidden ${swatch} ${
+                i < steps.length - 1 ? 'border-r border-paragon-black' : ''
+              } ${isActive ? 'is-active' : 'hover:!w-[108px]'}`}
             >
-              <ScrollReveal delay={i * 80}>
+              {/* Aba Vertical Colapsada (visível quando não está ativa) */}
+              {!isActive ? (
                 <button
                   type="button"
-                  aria-expanded={isOpen}
-                  aria-controls={`etapa-${s.number}`}
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  className={`grid w-full grid-cols-1 gap-y-4 py-[46px] text-left transition-all duration-300 md:py-[52px] lg:grid-cols-[56px_1fr_360px] lg:items-center lg:py-[64px] ${
-                    dim ? 'opacity-30' : 'opacity-100'
-                  }`}
+                  onClick={() => setActive(i)}
+                  aria-expanded={false}
+                  aria-label={`Expandir etapa ${step.number}: ${step.title}`}
+                  className="flex h-full w-full flex-col items-center justify-between py-6 text-paragon-black"
                 >
-                  <span className="font-display text-[15px] font-mono font-semibold text-zinc-500">
-                    {String(s.number).padStart(2, '0')}
+                  <span className="font-kicker text-[13px] font-medium">
+                    {String(step.number).padStart(2, '0')}
                   </span>
-                  <span className="font-display text-[28px] font-semibold leading-[1.1] tracking-[-0.01em] md:text-[32px] lg:text-[36px]">
-                    <SplitText text={s.title} speed="medium" mode="chars" delay={0} />
+
+                  <span className="relative flex flex-1 items-center justify-center">
+                    <span className="-rotate-90 font-display text-[28px] leading-none font-medium tracking-tight whitespace-nowrap uppercase">
+                      {step.title}
+                    </span>
                   </span>
-                  <span className="flex flex-col gap-3 lg:items-end lg:text-right">
-                    <span className="max-w-[360px] text-[17px] font-light leading-[1.35] text-fumaca lg:text-[15px]">
-                      <SplitText text={s.description} speed="fast" mode="words" delay={100} />
-                    </span>
-                    <span className="font-display text-[12px] font-medium uppercase tracking-[0.06em]">
-                      <span className="text-fumaca font-normal">Ferramentas · </span>
-                      <span className="font-semibold text-black">{s.tools}</span>
-                    </span>
+
+                  <span aria-hidden="true" className="text-[18px] leading-none">
+                    ✦
                   </span>
                 </button>
-              </ScrollReveal>
-
-              <div id={`etapa-${s.number}`} hidden={!isOpen} className="pb-10">
-                {isOpen ? (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-black/10 bg-black shadow-2xl lg:ml-[56px] lg:w-[min(760px,calc(100%-56px))]">
-                    <AutoVideo media={s.media} mode="visible" sizes="(min-width: 1200px) 760px, 100vw" />
+              ) : (
+                /* Conteúdo do Painel Ativo Expandido */
+                <div className="flex h-full w-full min-w-[560px] flex-col justify-between overflow-hidden">
+                  {/* Faixa Superior: Marquee Gigante Condensado (data-service-marquee-list) */}
+                  <div className="relative flex items-center overflow-hidden border-b border-paragon-black py-3">
+                    <div className="flex shrink-0 items-center whitespace-nowrap" data-service-marquee-list>
+                      {marqueeItems.map((title, idx) => (
+                        <span
+                          key={idx}
+                          className="flex items-center gap-5 px-4 font-display text-[clamp(3rem,5vw,5.25rem)] leading-[0.92] font-medium text-paragon-black uppercase"
+                        >
+                          <span>{title}</span>
+                          <span aria-hidden="true" className="text-[0.55em]">
+                            ✦
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                    <div
+                      aria-hidden="true"
+                      className="flex shrink-0 items-center whitespace-nowrap"
+                      data-service-marquee-list
+                    >
+                      {marqueeItems.map((title, idx) => (
+                        <span
+                          key={`dup-${idx}`}
+                          className="flex items-center gap-5 px-4 font-display text-[clamp(3rem,5vw,5.25rem)] leading-[0.92] font-medium text-paragon-black uppercase"
+                        >
+                          <span>{title}</span>
+                          <span aria-hidden="true" className="text-[0.55em]">
+                            ✦
+                          </span>
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                ) : null}
+
+                  {/* Corpo do Painel: Vídeo à esquerda + Descrição e Lista de Entregas à direita */}
+                  <div className="grid flex-1 grid-cols-12 items-end gap-8 p-7 xl:p-9">
+                    <div className="col-span-5 flex h-full flex-col justify-between">
+                      <div className="flex items-center justify-between font-kicker text-[13px] text-paragon-black uppercase">
+                        <span>Etapa {String(step.number).padStart(2, '0')}</span>
+                        <span aria-hidden="true">✦</span>
+                      </div>
+
+                      <div className="relative mt-4 aspect-[16/10] w-full overflow-hidden border border-paragon-black bg-paragon-black">
+                        <AutoVideo
+                          media={step.media}
+                          mode="visible"
+                          hovering={true}
+                          sizes="420px"
+                          fit={portrait ? 'object-cover object-[center_20%]' : 'object-cover object-center'}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-span-7 flex h-full flex-col justify-between">
+                      <p className="text-paragon-body max-w-[460px] text-paragon-black">
+                        <Fill text={step.description} />
+                      </p>
+
+                      {toolItems.length > 0 ? (
+                        <ul aria-label="Entregas e ferramentas da etapa" className="mt-6 border-t border-paragon-black">
+                          {toolItems.map((tool, tIdx) => (
+                            <li
+                              key={tIdx}
+                              className="flex items-center justify-between border-b border-paragon-black py-2.5 font-kicker text-[14px] text-paragon-black uppercase"
+                            >
+                              <span>{tool}</span>
+                              <span aria-hidden="true" className="text-[12px]">
+                                ✦
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* MOBILE: Painéis Empilhados com Borda 1px solid #100f0f (mobile-home-fold2.png da Paragon) */}
+      <ol className="flex flex-col border-t border-x border-paragon-black lg:hidden">
+        {steps.map((step, i) => {
+          const swatch = PANEL_SWATCHES[i % PANEL_SWATCHES.length];
+          const toolItems = splitTools(step.tools);
+          const portrait = isPortrait(step.media);
+
+          return (
+            <li key={step.id} className={`border-b border-paragon-black p-5 ${swatch}`}>
+              <div className="flex items-center justify-between border-b border-paragon-black pb-3">
+                <h3 className="text-paragon-h3 text-paragon-black">
+                  <Fill text={step.title} />
+                </h3>
+                <span className="font-kicker text-[13px] text-paragon-black">
+                  [{String(step.number).padStart(2, '0')}] ✦
+                </span>
               </div>
+
+              {step.media ? (
+                <div className="relative my-4 aspect-[16/10] w-full overflow-hidden border border-paragon-black bg-paragon-black">
+                  <AutoVideo
+                    media={step.media}
+                    mode="visible"
+                    sizes="100vw"
+                    fit={portrait ? 'object-cover object-[center_20%]' : 'object-cover object-center'}
+                  />
+                </div>
+              ) : null}
+
+              <p className="text-paragon-body text-paragon-black">
+                <Fill text={step.description} />
+              </p>
+
+              {toolItems.length > 0 ? (
+                <ul className="mt-4 border-t border-paragon-black">
+                  {toolItems.map((tool, tIdx) => (
+                    <li
+                      key={tIdx}
+                      className="flex items-center justify-between border-b border-paragon-black py-2 font-kicker text-[13px] text-paragon-black uppercase"
+                    >
+                      <span>{tool}</span>
+                      <span aria-hidden="true">✦</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </li>
           );
         })}
       </ol>
-
-      {/* Prévia flutuante de vídeo em HOVER que acompanha o mouse */}
-      <span
-        ref={dotRef}
-        aria-hidden
-        className={`pointer-events-none absolute left-0 top-0 z-30 hidden [@media(hover:hover)]:block transition-all duration-200 ease-out ${
-          hovered === null || open !== null ? 'opacity-0 scale-90' : 'opacity-100 scale-100'
-        }`}
-      >
-        <span className="relative block h-[230px] w-[340px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-white/20 bg-black shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]">
-          {steps.map((s, i) => (
-            <span
-              key={s.id}
-              className={`absolute inset-0 transition-opacity duration-200 ${
-                hovered === i ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              {s.media ? (
-                <AutoVideo
-                  media={s.media}
-                  mode="hover"
-                  hovering={hovered === i && open === null}
-                  sizes="340px"
-                  fit="object-cover"
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                <span className="rounded-full border border-white/20 bg-black/70 px-2.5 py-1 font-display text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                  Etapa {String(s.number).padStart(2, '0')} // Preview
-                </span>
-                <span className="font-mono text-[10px] text-zinc-300 uppercase tracking-widest font-semibold">
-                  PLAYING
-                </span>
-              </div>
-            </span>
-          ))}
-        </span>
-      </span>
     </div>
   );
 }
