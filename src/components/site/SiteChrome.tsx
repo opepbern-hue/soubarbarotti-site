@@ -25,7 +25,7 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <JsonLd data={globalJsonLd(settings)} />
-      <Preloader />
+      {/* Preloader desativado para garantir carregamento instantâneo e limpo do hero */}
       <AmbientSoundWidget />
       <SmoothScroll />
       <Header items={items} ctaLabel="Fale comigo" />

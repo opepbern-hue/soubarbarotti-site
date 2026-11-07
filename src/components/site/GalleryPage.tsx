@@ -31,8 +31,8 @@ export async function GalleryPage({ collection }: { collection: GalleryCollectio
   const c = CONFIG[collection];
   const [items, sections] = await Promise.all([getPhotos(collection), getSections()]);
   const head = sections[c.key];
-  if (head && !head.enabled) notFound();
 
+  // Sempre exibe a galeria se houver itens ou se for Fotos/Artes
   const realItems = items.filter((item) => item.media && !item.media.placeholder);
 
   return (
