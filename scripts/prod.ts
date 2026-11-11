@@ -14,8 +14,6 @@ import { loadEnv } from './load-env';
 loadEnv();
 
 async function checkDatabaseConnection(maxAttempts = 15, delayMs = 2000): Promise<boolean> {
-  const defaultSupabase =
-    'postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
   let dbUrl = process.env.DATABASE_URL || '';
   if (
     !dbUrl ||
@@ -24,9 +22,8 @@ async function checkDatabaseConnection(maxAttempts = 15, delayMs = 2000): Promis
     dbUrl.includes('nomedobanco') ||
     dbUrl.includes('usuario:senha')
   ) {
-    console.warn('[prod] Usando banco de dados Supabase padrão de produção...');
-    process.env.DATABASE_URL = defaultSupabase;
-    dbUrl = defaultSupabase;
+    console.error('[prod] DATABASE_URL não configurado no Dokploy. Configure a variável e faça o deploy de novo.');
+    return false;
   }
 
   const { PrismaClient } = await import('@prisma/client');

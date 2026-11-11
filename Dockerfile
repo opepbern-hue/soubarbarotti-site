@@ -18,7 +18,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-ENV DATABASE_URL="postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+# DATABASE_URL e SESSION_SECRET vêm das variáveis do Dokploy (não ficam no código)
 ENV STORAGE_DRIVER=local
 ENV STORAGE_DIR="./storage"
 ENV MEDIA_BASE_URL="/media"

@@ -10,13 +10,14 @@ export const env = {
     return str('SITE_URL', 'http://localhost:3000').replace(/\/$/, '');
   },
   get sessionSecret() {
-    return str('SESSION_SECRET', 'soubarbarotti-default-session-secret-key-32chars');
+    const v = process.env.SESSION_SECRET?.trim();
+    // Em produção a chave precisa vir do Dokploy: um valor padrão público permitiria forjar login
+    if (!v && process.env.NODE_ENV === 'production') throw new Error('SESSION_SECRET não configurado.');
+    return v || 'dev-only-session-secret-troque-em-producao-32chars';
   },
+  /** Senha inicial do admin (a trocada pelo painel, guardada no banco, vale mais) */
   get adminPasswordHash() {
-    return str(
-      'ADMIN_PASSWORD_HASH',
-      'scrypt:JVPQngqNac7H7vbM4hxhrQ:ar5JmyRX6I6geHHVTAYhWqsM3h5jAUBUXOs91JaxMHs4Ys1OaFrK8TWTHaFpqRDeIzvHrKslkdwPrlQ7RJFIFQ',
-    );
+    return str('ADMIN_PASSWORD_HASH', '');
   },
   /** `local` (pasta no disco) ou `r2` (Cloudflare R2 / qualquer S3) */
   get storageDriver(): 'local' | 'r2' {

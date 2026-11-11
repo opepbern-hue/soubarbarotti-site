@@ -1,29 +1,19 @@
 import { PrismaClient } from '@prisma/client';
 
-export const SUPABASE_PROD_DATABASE_URL =
-  'postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
-
+// O endereço do banco vem só da variável DATABASE_URL (Dokploy em produção, .env no computador).
+// Nunca escreva o endereço com senha aqui: o repositório é público.
 function resolveDatabaseUrl(): string | undefined {
   const url = process.env.DATABASE_URL?.trim();
-
-  // Se não estiver configurado, ou se for placeholder do template do Dokploy (contém "host:5432", "@host", "nomedobanco", "usuario:senha")
-  if (
-    !url ||
-    url.includes('@host') ||
-    url.includes('host:5432') ||
-    url.includes('nomedobanco') ||
-    url.includes('usuario:senha')
-  ) {
-    return SUPABASE_PROD_DATABASE_URL;
+  const placeholder =
+    !url || url.includes('@host') || url.includes('host:5432') || url.includes('nomedobanco') || url.includes('usuario:senha');
+  if (placeholder) {
+    console.error('[db] DATABASE_URL não configurado. Defina a variável no Dokploy (produção) ou no .env (local).');
+    return undefined;
   }
-
   return url;
 }
 
 const activeUrl = resolveDatabaseUrl();
-if (activeUrl && activeUrl !== process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = activeUrl;
-}
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 

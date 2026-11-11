@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 
 const LOCAL_URL = 'postgresql://postgres:postgres@localhost:5433/soubarbarotti';
-const SUPABASE_DB_URL =
-  'postgresql://soubarbarotti.xvabghgvrhpnyywpmodb:SouBarbarotti_DB_2026_Secure@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
+// Endereço do Supabase vem da variável SUPABASE_DB_URL (nunca escreva a senha aqui)
+const SUPABASE_DB_URL = process.env.SUPABASE_DB_URL ?? '';
+if (!SUPABASE_DB_URL) throw new Error('Defina SUPABASE_DB_URL para rodar este script.');
 
 const local = new PrismaClient({ datasources: { db: { url: LOCAL_URL } } });
 const supabase = new PrismaClient({ datasources: { db: { url: SUPABASE_DB_URL } } });
