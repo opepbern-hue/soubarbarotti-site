@@ -6,17 +6,8 @@ export function whatsappLink(raw: string): string {
   return `https://wa.me/${digits.startsWith('55') ? digits : `55${digits}`}`;
 }
 
-/** Links de redes sociais e canais diretos no estilo arquitetônico da Paragon (nunca exibe [PREENCHER]). */
-export function Social({
-  settings,
-  className = '',
-  variant = 'boxes',
-}: {
-  settings: SettingsView;
-  className?: string;
-  showMissing?: boolean;
-  variant?: 'boxes' | 'text';
-}) {
+/** Ícones das redes. Os canais que ainda não foram informados aparecem como [PREENCHER]. */
+export function Social({ settings, className = '', showMissing = true }: { settings: SettingsView; className?: string; showMissing?: boolean }) {
   const links = [
     { key: 'Instagram', href: settings.instagramUrl, Icon: InstagramIcon },
     { key: 'WhatsApp', href: settings.whatsapp ? whatsappLink(settings.whatsapp) : '', Icon: WhatsappIcon },
@@ -24,48 +15,30 @@ export function Social({
     { key: 'LinkedIn', href: settings.linkedinUrl, Icon: LinkedinIcon },
     { key: 'YouTube', href: settings.youtubeUrl, Icon: YoutubeIcon },
   ];
-  const present = links.filter((l) => l.href && !/\[PREENCHER/i.test(l.href));
-
-  if (variant === 'text') {
-    return (
-      <div className={className}>
-        <ul className="flex flex-wrap items-center gap-6">
-          {present.map(({ key, href }) => (
-            <li key={key}>
-              <a
-                href={href}
-                target={href.startsWith('mailto:') ? undefined : '_blank'}
-                rel="noopener"
-                className="u-text-button text-paragon-kicker"
-              >
-                <span data-button-animate-chars>
-                  <span>{key}</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
+  const present = links.filter((l) => l.href);
+  const missing = links.filter((l) => !l.href).map((l) => l.key);
   return (
     <div className={className}>
-      <ul className="flex flex-wrap items-center">
-        {present.map(({ key, href, Icon }, idx) => (
-          <li key={key} className={idx > 0 ? '-ml-px' : ''}>
+      <ul className="flex flex-wrap items-center gap-3">
+        {present.map(({ key, href, Icon }) => (
+          <li key={key}>
             <a
               href={href}
               target={href.startsWith('mailto:') ? undefined : '_blank'}
               rel="noopener"
               aria-label={key}
-              className="grid size-11 place-items-center border border-current bg-transparent transition-colors duration-300 hover:bg-paragon-red hover:text-paragon-black"
+              className="grid size-10 place-items-center rounded-full bg-branco-tela text-carvao ring-1 ring-linha transition-colors hover:text-brasa"
             >
               <Icon className="size-[18px]" />
             </a>
           </li>
         ))}
       </ul>
+      {showMissing && missing.length ? (
+        <p className="mt-3 text-[12px]">
+          <mark className="preencher">[PREENCHER: {missing.join(', ')}]</mark>
+        </p>
+      ) : null}
     </div>
   );
 }

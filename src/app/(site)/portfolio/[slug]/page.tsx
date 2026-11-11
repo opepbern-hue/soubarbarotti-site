@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AutoVideo } from '@/components/site/AutoVideo';
 import { Contact } from '@/components/site/Contact';
-import { Container } from '@/components/site/Hud';
+import { RecLabel } from '@/components/site/Hud';
 import { JsonLd } from '@/components/site/JsonLd';
 import { Picture } from '@/components/site/Picture';
 import { ProjectStage } from '@/components/site/ProjectStage';
@@ -13,8 +13,8 @@ import { absolute, projectJsonLd } from '@/lib/seo';
 
 type Props = { params: Promise<{ slug: string }> };
 
-// Filtra qualquer campo vazio ou que contenha marcador interno [PREENCHER...]
-const filled = (v: string | null | undefined) => !!v && v.trim().length > 0 && !/\[PREENCHER/i.test(v);
+// Campo "vazio" = sem texto ou só com a marca [PREENCHER]: a seção não aparece
+const filled = (v: string | null | undefined) => !!v && !/^\s*\[PREENCHER[^\]]*\]\s*$/.test(v);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -23,10 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = data.project;
   const title = p.seoTitle || (filled(p.category) ? `${p.title}: ${p.category}` : p.title);
   const description =
-    p.seoDescription ||
-    (filled(p.shortDescription)
-      ? p.shortDescription
-      : `Vídeo com IA generativa dirigido por Barbarotti (@soubarbarotti): ${p.title}.`);
+    p.seoDescription || (filled(p.shortDescription) ? p.shortDescription : `Vídeo com IA generativa dirigido por Barbarotti (@soubarbarotti): ${p.title}.`);
   const image = p.media?.img?.src ? absolute(p.media.img.src) : absolute('/og.png');
   return {
     title,
@@ -55,63 +52,62 @@ export default async function ProjectPage({ params }: Props) {
   ).filter(([, v]) => filled(v));
   const blocks = p.blocks.filter((b) => filled(b.title) || filled(b.text));
   const gallery = p.gallery.filter((g) => g.media && !g.media.placeholder);
-  const hasDetails = credits.length || facts.length > 0 || blocks.length || gallery.length || filled(p.shortDescription);
+  const hasDetails = credits.length || facts.length > 1 || blocks.length || gallery.length || filled(p.shortDescription);
 
   return (
-    <article className="bg-paragon-black text-paragon-white">
+    <article>
       <JsonLd data={projectJsonLd(p)} />
 
-      <ProjectStage
-        media={p.media}
-        fullVideo={p.fullVideo}
-        url={p.fullVideoUrl}
-        title={p.title}
-        category={filled(p.category) ? p.category : ''}
-        client={filled(p.client) ? p.client : undefined}
-      />
+      <ProjectStage media={p.media} fullVideo={p.fullVideo} url={p.fullVideoUrl} title={p.title} category={filled(p.category) ? p.category : ''} />
 
-      <Container className="py-[64px] lg:py-[110px]">
+      {credits.length ? (
+        <section aria-label="Créditos" className="marquee-host overflow-hidden border-b border-linha py-5">
+          <div className="marquee" style={{ ['--marquee-duration' as string]: `${Math.max(30, credits.length * 9)}s` }}>
+            {[false, true].map((dup) => (
+              <ul key={String(dup)} data-dup={dup ? '' : undefined} aria-hidden={dup || undefined} className="flex shrink-0 items-center">
+                {credits.map((c, i) => (
+                  <li key={i} className="flex items-center gap-3 whitespace-nowrap px-6">
+                    <span className="font-display text-[13px] font-medium uppercase tracking-[0.04em] text-fumaca">
+                      <Fill text={c.stage} />
+                    </span>
+                    {filled(c.role) ? <span className="text-[16px] font-medium">{c.role}</span> : null}
+                    {filled(c.tools) ? <span className="text-[16px]">{c.tools}</span> : null}
+                    <span aria-hidden className="ml-6 inline-block size-[5px] rotate-45 bg-laranja" />
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <div className="px-5 lg:px-[140px]">
         {hasDetails ? (
           <>
-            {/* Resumo Executivo e Ficha Técnica Arquitetônica (4 colunas com borda 1px solid) */}
             {filled(p.shortDescription) ? (
-              <div className="mb-12 max-w-[880px] lg:mb-16">
-                <p className="text-paragon-kicker mb-3 text-paragon-red">SINOPSE DO PROJETO</p>
-                <p className="text-paragon-h3 text-paragon-white">{p.shortDescription}</p>
-              </div>
+              <p className="max-w-[760px] pt-[60px] font-display text-[24px] leading-[1.25] tracking-[-0.01em] md:text-[30px] lg:pt-[100px]">{p.shortDescription}</p>
             ) : null}
 
             {facts.length ? (
-              <dl className="mb-16 grid grid-cols-1 border-t border-l border-paragon-white/22 sm:grid-cols-2 lg:mb-24 lg:grid-cols-4">
+              <dl className="grid gap-8 py-[50px] md:grid-cols-4 md:gap-6 lg:py-[90px]">
                 {facts.map(([k, v]) => (
-                  <div key={k} className="border-r border-b border-paragon-white/22 p-5 lg:p-7">
-                    <dt className="font-kicker text-[12px] text-paragon-grey-400 uppercase">{k}</dt>
-                    <dd className="text-paragon-h5 mt-2 text-paragon-white">{v}</dd>
+                  <div key={k}>
+                    <dt className="font-display text-[14px] font-medium uppercase tracking-[0.04em] text-fumaca">{k}</dt>
+                    <dd className="mt-3 text-[18px] leading-[1.3]">{v}</dd>
                   </div>
                 ))}
               </dl>
             ) : null}
 
-            {/* Blocos de Estudo de Caso (THE ASK / APPROACH / HOW IT HAPPENED da Paragon) */}
             {blocks.length ? (
-              <div className="border-t border-paragon-white/22">
-                {blocks.map((b, idx) => (
-                  <section
-                    key={b.key}
-                    className="grid grid-cols-1 gap-6 border-b border-paragon-white/22 py-12 lg:grid-cols-12 lg:gap-12 lg:py-16"
-                  >
-                    <div className="lg:col-span-5">
-                      <span className="font-kicker text-[12px] text-paragon-red uppercase">
-                        [0{idx + 1}]
-                      </span>
-                      <h2 className="text-paragon-h2 mt-1 text-paragon-white">{b.label}</h2>
-                    </div>
-                    <div className="lg:col-span-7">
-                      {filled(b.title) ? (
-                        <p className="text-paragon-h4 mb-4 text-paragon-white">{b.title}</p>
-                      ) : null}
+              <div className="flex flex-col gap-[60px] pb-[70px] lg:gap-[90px] lg:pb-[110px]">
+                {blocks.map((b) => (
+                  <section key={b.key} className="grid gap-4 md:grid-cols-[1fr_minmax(0,500px)] md:gap-10">
+                    <h2 className="font-display text-[14px] font-medium uppercase tracking-[0.04em] text-fumaca">{b.label}</h2>
+                    <div>
+                      {filled(b.title) ? <p className="text-[18px] font-medium leading-[1.3]">{b.title}</p> : null}
                       {filled(b.text) ? (
-                        <div className="text-paragon-body flex flex-col gap-4 text-paragon-white/85">
+                        <div className="mt-3 flex flex-col gap-3 text-[16px] leading-[1.5] text-fumaca">
                           <Paragraphs text={b.text} />
                         </div>
                       ) : null}
@@ -121,20 +117,13 @@ export default async function ProjectPage({ params }: Props) {
               </div>
             ) : null}
 
-            {/* Galeria de Frames e Bastidores (STILLS & BTS da Paragon — apenas mídias reais) */}
             {gallery.length ? (
-              <section aria-label="Frames e bastidores" className="mt-20 lg:mt-28">
-                <div className="mb-8 flex items-end justify-between">
-                  <h2 className="text-paragon-h1 text-paragon-white">Frames &amp; Bastidores</h2>
-                  <span className="font-kicker text-[13px] text-paragon-grey-400 uppercase">
-                    [{gallery.length} ITENS]
-                  </span>
-                </div>
-                <ul className="grid grid-cols-1 border-t border-l border-paragon-white/22 md:grid-cols-2">
+              <section aria-label="Frames e bastidores" className="pb-[60px] lg:pb-[110px]">
+                <ul className="grid gap-5 md:grid-cols-2 lg:gap-[30px]">
                   {gallery.map((g) => (
-                    <li key={g.id} className="border-r border-b border-paragon-white/22 p-4 lg:p-6">
+                    <li key={g.id}>
                       <figure>
-                        <div className="on-video relative aspect-[16/10] overflow-hidden bg-paragon-grey-600">
+                        <div className="on-video relative aspect-square overflow-hidden bg-carvao">
                           {g.media?.kind === 'VIDEO' ? (
                             <AutoVideo media={g.media} mode="visible" sizes="(min-width: 810px) 50vw, 100vw" />
                           ) : (
@@ -145,53 +134,29 @@ export default async function ProjectPage({ params }: Props) {
                               className="absolute inset-0 h-full w-full object-cover"
                             />
                           )}
-                          <span className="absolute top-3 left-3 border border-paragon-white/30 bg-paragon-black/80 px-2.5 py-1 font-kicker text-[11px] text-paragon-white uppercase">
-                            {g.kind === 'FRAME' ? 'Still / Frame' : 'Bastidor / BTS'}
+                          <span className="absolute left-4 top-4 rounded-full bg-carvao/55 px-3 py-1 font-display text-[11px] font-medium uppercase tracking-[0.08em] text-white backdrop-blur-sm">
+                            {g.kind === 'FRAME' ? 'Frame' : 'Bastidor'}
                           </span>
                         </div>
-                        {filled(g.caption) ? (
-                          <figcaption className="mt-3 font-sans text-[14px] text-paragon-grey-400">
-                            {g.caption}
-                          </figcaption>
-                        ) : null}
+                        {g.caption ? <figcaption className="mt-3 text-[14px] text-fumaca">{g.caption}</figcaption> : null}
                       </figure>
                     </li>
                   ))}
                 </ul>
               </section>
             ) : null}
-
-            {/* Créditos Técnicos (CREDITS da Paragon — exibido apenas quando houver créditos reais preenchidos) */}
-            {credits.length ? (
-              <section aria-label="Créditos" className="mt-20 border-t border-paragon-white/22 pt-14 lg:mt-28">
-                <h2 className="text-paragon-h2 mb-8 text-paragon-white">Créditos</h2>
-                <dl className="grid grid-cols-1 border-t border-l border-paragon-white/22 sm:grid-cols-2 lg:grid-cols-3">
-                  {credits.map((c, i) => (
-                    <div key={i} className="border-r border-b border-paragon-white/22 p-5">
-                      <dt className="font-kicker text-[12px] text-paragon-red uppercase">
-                        <Fill text={c.stage} />
-                      </dt>
-                      {filled(c.role) ? (
-                        <dd className="text-paragon-h5 mt-1 text-paragon-white">{c.role}</dd>
-                      ) : null}
-                      {filled(c.tools) ? (
-                        <dd className="mt-1 font-sans text-[14px] text-paragon-grey-400">{c.tools}</dd>
-                      ) : null}
-                    </div>
-                  ))}
-                </dl>
-              </section>
-            ) : null}
           </>
         ) : null}
 
-        {/* Próximo Projeto (DISCOVER NEXT PROJECT da Paragon) */}
         {next ? (
-          <section aria-label="Próximo projeto" className="mt-20 lg:mt-28">
-            <WorkRow project={next} as="h2" />
+          <section aria-label="Próximo projeto" className="pb-[80px] pt-[60px] lg:pb-[120px] lg:pt-[90px]">
+            <RecLabel>Próximo projeto</RecLabel>
+            <div className="mt-6 border-t border-linha">
+              <WorkRow project={next} as="h2" />
+            </div>
           </section>
         ) : null}
-      </Container>
+      </div>
 
       {contact && contact.enabled ? <Contact section={contact} settings={settings} /> : null}
     </article>

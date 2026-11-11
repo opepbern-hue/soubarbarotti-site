@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 
 /**
  * Rolagem com inércia no desktop (roda do mouse / trackpad).

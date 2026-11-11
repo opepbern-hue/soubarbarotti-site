@@ -1,23 +1,22 @@
 import type { ReactNode } from 'react';
 import { ScrollReveal, SplitText } from './ScrollReveal';
+import { Fill } from './Text';
 
-/** Kicker técnico de seção no estilo Simplon Norm da Paragon (16px desktop / 14.125px mobile, uppercase) */
+/** Selo de seção */
 export function RecLabel({ children, className = '' }: { children: string; className?: string }) {
-  const clean = children
-    .replace(/^●?\s*REC:\s*/i, '')
-    .replace(/^\[|\]$/g, '')
-    .trim();
+  const clean = children.replace(/^●?\s*REC:\s*/i, '').trim();
   if (!clean) return null;
   return (
-    <p className={`text-paragon-kicker flex items-center gap-2 ${className}`}>
+    <p className={`flex items-center gap-2.5 font-display text-[14px] leading-[1.3] font-medium uppercase ${className}`}>
+      {/* Revela sozinho quando aparece na tela (também fora de um SectionHeading) */}
       <ScrollReveal as="span">
-        <SplitText text={clean} speed="fast" mode="words" />
+        <SplitText text={clean} speed="medium" mode="chars" />
       </ScrollReveal>
     </p>
   );
 }
 
-/** Cabeçalho de seção na escala monumental da Paragon (Review Condensed / Barlow Condensed) */
+/** Título de seção em duas linhas com SplitText e Blur no estilo AnimeJS */
 export function SectionHeading({
   label,
   line1,
@@ -39,41 +38,33 @@ export function SectionHeading({
 }) {
   const center = align === 'center';
   const tab = align === 'tablet-center';
-  const sizes = size === 'page' ? 'text-paragon-display' : 'text-paragon-h1';
-
+  const sizes =
+    size === 'page'
+      ? 'text-[51px] leading-[0.9] tracking-[-0.03em] font-medium md:text-[64px] lg:text-[80px]'
+      : 'text-[48px] leading-none tracking-[-0.04em] font-semibold lg:text-[56px]';
   return (
-    <div
-      className={`${center ? 'flex flex-col items-center text-center' : ''} ${
-        tab ? 'md:text-center lg:text-left' : ''
-      } ${className}`}
-    >
+    <div className={`${center ? 'flex flex-col items-center text-center' : ''} ${tab ? 'md:text-center lg:text-left' : ''} ${className}`}>
       {label ? (
-        <div className="mb-4">
-          <RecLabel className={center ? 'justify-center' : tab ? 'md:justify-center lg:justify-start' : ''}>
-            {label}
-          </RecLabel>
-        </div>
+        <ScrollReveal as="span" delay={0}>
+          <RecLabel className={center ? 'justify-center' : tab ? 'md:justify-center lg:justify-start' : ''}>{label}</RecLabel>
+        </ScrollReveal>
       ) : null}
-      <Tag className={`${sizes}`}>
-        <ScrollReveal as="span" delay={40}>
+      <Tag className={`font-display ${sizes} ${label ? 'mt-[30px]' : ''}`}>
+        <ScrollReveal as="span" delay={60}>
           <span className="block">
-            <SplitText text={line1} speed="slow" mode="words" delay={0} />
+            <SplitText text={line1} speed="slow" mode="chars" delay={0} />
           </span>
           {line2 ? (
-            <span className="block">
-              <SplitText text={line2} speed="slow" mode="words" delay={90} />
+            <span className="block text-fumaca mt-1">
+              <SplitText text={line2} speed="slow" mode="chars" delay={150} />
             </span>
           ) : null}
         </ScrollReveal>
       </Tag>
       {intro ? (
-        <ScrollReveal as="div" delay={140}>
-          <p
-            className={`text-paragon-body mt-6 max-w-[380px] opacity-80 ${
-              center ? 'mx-auto' : tab ? 'md:mx-auto lg:mx-0' : ''
-            }`}
-          >
-            <SplitText text={intro} speed="fast" mode="words" delay={80} />
+        <ScrollReveal as="div" delay={180}>
+          <p className={`mt-[30px] max-w-[320px] text-[16px] leading-[1.3] text-fumaca ${center ? 'mx-auto' : tab ? 'md:mx-auto lg:mx-0' : ''}`}>
+            <SplitText text={intro} speed="fast" mode="words" delay={100} />
           </p>
         </ScrollReveal>
       ) : null}
@@ -81,23 +72,38 @@ export function SectionHeading({
   );
 }
 
-/** Texto com efeito de slide vertical da Paragon ([data-button-animate-chars]) */
+
+
+
+/** Texto com letras que rolam no hover (acessível: o texto real vai no aria-label do link/botão) */
 export function RollText({ text }: { text: string }) {
   return (
-    <span data-button-animate-chars>
-      <span>{text}</span>
+    <span className="roll" aria-hidden>
+      {[...text].map((ch, i) => {
+        const c = ch === ' ' ? ' ' : ch;
+        return (
+          <span key={i} className="roll-ch" style={{ ['--i' as string]: i }}>
+            <span>{c}</span>
+            <span>{c}</span>
+          </span>
+        );
+      })}
     </span>
   );
 }
 
-/** Container principal alinhado ao grid da Paragon (--site-margin: 48px desktop / 18px mobile) */
 export function Container({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`paragon-container ${className}`}>{children}</div>;
+  return <div className={`px-5 lg:px-[100px] ${className}`}>{children}</div>;
 }
 
-/** Cantos arquitetônicos discretos (mantido para compatibilidade) */
+/** Cantos de visor */
 export function Viewfinder({ className = '' }: { className?: string }) {
   return (
-    <span aria-hidden className={`pointer-events-none absolute inset-0 border border-current/20 ${className}`} />
+    <span aria-hidden className={`viewfinder pointer-events-none absolute ${className}`}>
+      <i />
+      <i />
+      <i />
+      <i />
+    </span>
   );
 }

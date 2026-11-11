@@ -1,10 +1,212 @@
 'use client';
 
 import Link from 'next/link';
+import { useRef, useState, type PointerEvent } from 'react';
 import type { ProjectCard, SectionView } from '@/lib/content';
-import { RollText } from './Hud';
-import { ScrollReveal, SplitText } from './ScrollReveal';
-import { WorkCard } from './WorkCard';
+import { isPortrait } from '@/lib/media-shared';
+import { AutoVideo } from './AutoVideo';
+import { Container, RecLabel, Viewfinder } from './Hud';
+import { ArrowUpRight } from './icons';
+import { Fill } from './Text';
+import { timecode, useCursorFollower } from './WorkCard';
+
+function ProjectStackCard({
+  project,
+  index,
+  total,
+}: {
+  project: ProjectCard;
+  index: number;
+  total: number;
+}) {
+  const [hovering, setHovering] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const timeRef = useRef<HTMLSpanElement>(null);
+  const portrait = isPortrait(project.media);
+  const { hostRef, dotRef, track } = useCursorFollower(hovering, 80);
+
+  const onMove = (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    track(e, !hovering);
+    if (!hovering) setHovering(true);
+  };
+
+  const posterBg = project.media?.blur || project.media?.img?.src;
+
+  return (
+    <div
+      className="sticky top-20 sm:top-24 lg:top-28 pb-10 sm:pb-14 lg:pb-16"
+      style={{ zIndex: index + 10 }}
+    >
+      <Link
+        ref={(el) => {
+          hostRef.current = el;
+        }}
+        href={`/portfolio/${project.slug}`}
+        onPointerMove={onMove}
+        onPointerLeave={() => setHovering(false)}
+        className="on-video group relative block h-[60vh] sm:h-[64vh] lg:h-[68vh] min-h-[440px] max-h-[580px] w-full overflow-hidden rounded-3xl border border-white/20 bg-[#0a0a0d] text-white shadow-[0_-20px_60px_rgba(0,0,0,0.9)] transition-colors duration-500 hover:border-white/40"
+      >
+        {/* 1. MÍDIA: TRATAMENTO DIFERENCIADO WIDESCREEN vs VERTICAL */}
+        {portrait ? (
+          <>
+            {/* Ambient blurred glow no fundo do card */}
+            {posterBg ? (
+              <span
+                aria-hidden
+                className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-125 pointer-events-none"
+                style={{ backgroundImage: `url(${posterBg})` }}
+              />
+            ) : null}
+            <span aria-hidden className="absolute inset-0 bg-black/60 pointer-events-none" />
+
+            {/* Layout para vídeos em pé (9:16): Desktop split / Mobile centrado */}
+            <div className="relative z-10 flex h-full w-full flex-col lg:flex-row items-center justify-between p-6 sm:p-8 lg:p-10 gap-6 lg:gap-8">
+              {/* Informações à esquerda em telas grandes */}
+              <div className="flex flex-1 flex-col justify-between h-full py-1 z-10">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-zinc-400 bg-white/10 px-2.5 py-1 rounded-full border border-white/15">
+                      {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+                    </span>
+                    <span className="font-display text-[12px] font-semibold uppercase tracking-wider text-zinc-300">
+                      <Fill text={project.category} />
+                    </span>
+                  </div>
+
+                  <h3 className="mt-3 font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white drop-shadow-md">
+                    <Fill text={project.title} />
+                  </h3>
+
+                  {project.shortDescription && (
+                    <p className="mt-3 max-w-md font-sans text-sm sm:text-base leading-relaxed text-zinc-300/90 font-light hidden sm:block">
+                      {project.shortDescription}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 pt-4">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-display text-[12px] font-bold uppercase tracking-wider text-white">
+                    <span>9:16 Vertical</span>
+                  </span>
+
+                  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-[background-color,scale] duration-300 group-hover:bg-zinc-200 group-hover:scale-105 shadow-xl">
+                    Ver Case <ArrowUpRight className="size-4" />
+                  </span>
+                </div>
+              </div>
+
+              {/* Moldura elegante do vídeo 9:16 */}
+              <div className="relative shrink-0 aspect-[9/16] h-[75%] sm:h-[82%] lg:h-[94%] max-h-[500px] rounded-2xl overflow-hidden border border-white/25 bg-black shadow-[0_25px_60px_rgba(0,0,0,0.95)] group-hover:border-white/50 transition-colors duration-300">
+                <AutoVideo
+                  media={project.media}
+                  mode="visible"
+                  hovering={true}
+                  onTime={(t) => {
+                    if (timeRef.current) timeRef.current.textContent = timecode(t);
+                  }}
+                  onPlayingChange={setPlaying}
+                  sizes="(min-width: 1024px) 30vw, 75vw"
+                  fit="object-cover"
+                />
+                <Viewfinder className="inset-4 opacity-40 group-hover:opacity-80 transition-opacity" />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none"
+                />
+
+                {/* Live timecode no topo da moldura */}
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-end font-mono text-[10px] text-white pointer-events-none">
+                  <span
+                    ref={timeRef}
+                    className="bg-black/70 px-2 py-0.5 rounded-full border border-white/20"
+                  >
+                    00:00:00
+                  </span>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Layout para vídeos widescreen (16:9) */}
+            <AutoVideo
+              media={project.media}
+              mode="visible"
+              hovering={true}
+              onTime={(t) => {
+                if (timeRef.current) timeRef.current.textContent = timecode(t);
+              }}
+              onPlayingChange={setPlaying}
+              sizes="(min-width: 1088px) 1024px, 100vw"
+              fit="object-cover"
+            />
+
+            {/* Gradients de alto contraste para leitura perfeita */}
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/20 to-black/90 pointer-events-none"
+            />
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.6)_100%)] pointer-events-none"
+            />
+
+            {/* Viewfinder da câmera */}
+            <Viewfinder className="inset-5 sm:inset-8 lg:inset-10 opacity-35 group-hover:opacity-80 transition-opacity" />
+
+            {/* Barra superior do Card */}
+            <div className="absolute top-6 left-6 right-6 sm:top-8 sm:left-8 sm:right-8 flex items-center justify-between pointer-events-none z-10">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs font-bold text-zinc-300 bg-black/75 px-3 py-1 rounded-full border border-white/20">
+                  {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+                </span>
+                <span className="font-display text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider text-zinc-300 bg-black/75 px-3.5 py-1 rounded-full border border-white/20">
+                  <Fill text={project.category} />
+                </span>
+              </div>
+
+              <span className="inline-flex items-center gap-2 font-mono text-[11px] font-bold text-white bg-black/75 px-3.5 py-1 rounded-full border border-white/20">
+                <span ref={timeRef}>00:00:00</span>
+              </span>
+            </div>
+
+            {/* Barra inferior do Card */}
+            <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pointer-events-none z-10">
+              <div className="max-w-xl">
+                <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white drop-shadow-lg">
+                  <Fill text={project.title} />
+                </h3>
+                {project.shortDescription && (
+                  <p className="mt-2 line-clamp-2 max-w-lg font-sans text-xs sm:text-sm leading-relaxed text-zinc-300 font-light drop-shadow">
+                    {project.shortDescription}
+                  </p>
+                )}
+              </div>
+
+              <span className="pointer-events-auto self-start sm:self-end flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-[13px] font-bold uppercase tracking-wider text-black transition-[background-color,scale] duration-300 group-hover:bg-zinc-200 group-hover:scale-105 shadow-2xl">
+                Ver Case <ArrowUpRight className="size-4" />
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* Cursor Magnético com "Ver Case ↗" no hover em desktop */}
+        <span
+          ref={dotRef}
+          aria-hidden
+          className={`pointer-events-none absolute left-0 top-0 z-30 hidden lg:grid size-20 place-items-center rounded-full bg-[#ff6a00] font-display text-[11px] font-bold uppercase tracking-wider text-black shadow-2xl transition-opacity duration-200 ${
+            hovering ? 'opacity-90' : 'opacity-0'
+          }`}
+        >
+          <span className="flex items-center gap-1">
+            Ver <ArrowUpRight className="size-3.5" />
+          </span>
+        </span>
+      </Link>
+    </div>
+  );
+}
 
 export function WorksSection({
   projects,
@@ -15,77 +217,63 @@ export function WorksSection({
 }) {
   if (!projects.length) return null;
 
-  const headingText = [section.titleLine1 || 'Trabalhos', section.titleLine2 || 'Selecionados']
-    .filter(Boolean)
-    .join(' ');
-  const introText =
-    section.intro ||
-    'Projetos comerciais e filmes dirigidos com IA generativa, motion design e finalização cinematográfica.';
-
   return (
     <section
       id="trabalhos"
-      aria-label="Trabalhos selecionados"
-      className="featured-work_wrap scroll-mt-16 bg-paragon-black py-[64px] text-paragon-white lg:py-[120px]"
+      aria-label="Trabalhos em destaque"
+      className="scroll-mt-16 bg-[#070709] text-white py-[90px] lg:py-[130px] border-y border-white/10 relative overflow-visible shadow-2xl"
     >
-      <div className="paragon-container">
-        {/* Cabeçalho Monumental da Paragon: Display 156px à esquerda + H2 48px alinhado à direita */}
-        <div className="mb-10 flex flex-col justify-between gap-6 lg:mb-14 lg:flex-row lg:items-end">
-          <div className="lg:max-w-[62%]">
-            {section.label ? (
-              <p className="text-paragon-kicker mb-3 text-paragon-red">
-                {section.label.replace(/^\[|\]$/g, '')}
-              </p>
-            ) : null}
-            <h2 className="text-paragon-display text-paragon-white">
-              <ScrollReveal as="span" delay={40}>
-                <SplitText text={headingText} speed="slow" mode="words" />
-              </ScrollReveal>
+      {/* Textura sutil e vinheta escura de alto contraste */}
+      <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06)_0%,transparent_70%)]" />
+
+      {/* Título da Seção */}
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-8 mb-12 sm:mb-16 lg:mb-20">
+        <div className="flex items-end justify-between">
+          <div>
+            <RecLabel className="text-zinc-400">{section.label || 'TRABALHOS'}</RecLabel>
+            <h2 className="mt-2 font-display text-[32px] sm:text-[40px] lg:text-[48px] font-bold leading-tight tracking-[-0.02em] text-white">
+              {section.titleLine1 || 'Projetos em Destaque'}
+              {section.titleLine2 ? (
+                <span className="block text-zinc-400 font-normal">{section.titleLine2}</span>
+              ) : (
+                <span className="block text-zinc-400 font-normal text-[18px] sm:text-[22px] mt-1 font-sans">
+                  Mais de 120+ projetos entregues
+                </span>
+              )}
             </h2>
           </div>
 
-          <div className="lg:max-w-[420px] lg:text-right">
-            <ScrollReveal delay={120}>
-              <p className="text-paragon-h3 text-paragon-white">
-                <SplitText text={introText} speed="fast" mode="words" delay={60} />
-              </p>
-            </ScrollReveal>
-          </div>
-        </div>
-
-        {/* Grid Arquitetônico da Paragon (STYLE 13: 5n+1 e 5n+2 ocupam 3/6 colunas; demais ocupam 2/6 colunas) */}
-        <div className="grid grid-cols-1 border-t border-l border-paragon-white/22 lg:grid-cols-6">
-          {projects.map((project, idx) => {
-            const mod = idx % 5;
-            const spanClass = mod === 0 || mod === 1 ? 'lg:col-span-3' : 'lg:col-span-2';
-            return (
-              <div
-                key={project.id}
-                className={`${spanClass} border-r border-b border-paragon-white/22`}
-              >
-                <WorkCard project={project} index={idx} className="h-full" />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Barra Inferior de Largura Total com ✦ nas extremidades e link sublinhado no centro */}
-        <div className="flex items-center justify-between border-x border-b border-paragon-white/22 px-5 py-5 lg:px-8 lg:py-6">
-          <span aria-hidden="true" className="text-[14px] text-paragon-white">
-            ✦
-          </span>
-
           <Link
             href="/portfolio"
-            className="u-text-button text-paragon-kicker text-paragon-white hover:text-paragon-red"
+            className="hidden items-center gap-2 font-display text-[13px] font-semibold uppercase tracking-[0.06em] text-white/90 border border-white/20 bg-white/5 hover:bg-white hover:text-black rounded-full px-5 py-2.5 transition-colors duration-300 md:flex shadow-lg"
           >
-            <RollText text="Ver arquivo completo de projetos" />
+            Portfólio completo (+120 projetos entregues) <ArrowUpRight className="size-4" />
           </Link>
-
-          <span aria-hidden="true" className="text-[14px] text-paragon-white">
-            ✦
-          </span>
         </div>
+      </div>
+
+      {/* CONTAINER DE CARTÕES EMPILHADOS (STICKY STACKING CARDS ON SCROLL) */}
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-8">
+        <div className="relative flex flex-col gap-6 sm:gap-10 lg:gap-14">
+          {projects.map((project, idx) => (
+            <ProjectStackCard
+              key={project.id}
+              project={project}
+              index={idx}
+              total={projects.length}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Botão Inferior para Portfólio Completo */}
+      <div className="mt-16 sm:mt-20 flex justify-center relative z-10 px-5">
+        <Link
+          href="/portfolio"
+          className="inline-flex items-center gap-2 font-display text-[14px] font-semibold uppercase tracking-[0.05em] text-white hover:bg-white hover:text-black transition-[background-color,color,scale] duration-300 border border-white/20 rounded-full px-7 py-3.5 bg-black/80 shadow-2xl hover:scale-105 active:scale-95"
+        >
+          Ver o portfólio completo (+120 projetos entregues) <ArrowUpRight className="size-4" />
+        </Link>
       </div>
     </section>
   );

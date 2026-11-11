@@ -1,124 +1,104 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import { preload } from 'react-dom';
 import type { SettingsView } from '@/lib/content';
 import { AutoVideo } from './AutoVideo';
-import { BarbarottiSymbol } from './Header';
-import { RollText } from './Hud';
 import { ScrollReveal, SplitText } from './ScrollReveal';
 
 export function Hero({ settings }: { settings: SettingsView }) {
   const media = settings.heroMedia;
-
-  const tagline =
-    settings.heroTagline?.trim() ||
-    'Direção cinematográfica e motion design com IA generativa para marcas e empreendedores que buscam alto padrão visual e conversão real.';
-
-  const headline =
-    settings.footerLine1 && settings.footerLine2
-      ? `${settings.footerLine1.replace(/[.,;]+$/, '')} ${settings.footerLine2.replace(/\.$/, '')}`
-      : 'A SUA IDEIA COM CARA DE CINEMA';
+  // A capa do hero é a primeira coisa que aparece: o navegador já pede junto com o HTML
+  if (media?.img) {
+    preload(media.img.src, {
+      as: 'image',
+      fetchPriority: 'high',
+      imageSrcSet: media.img.avif,
+      imageSizes: '100vw',
+      type: 'image/avif',
+    });
+  }
+  const location = settings.heroLocation?.trim() || 'Palhoça, SC & Remoto';
+  const tagline = settings.heroTagline;
+  const list =
+    Array.isArray(settings.heroList) && settings.heroList.length > 0
+      ? settings.heroList
+      : [
+          'Comerciais de Alto Padrão',
+          'Vídeos com IA & Motion Design',
+          'Audiovisual Imobiliário',
+          'Posicionamento de Autoridade',
+        ];
 
   return (
     <section
       aria-label="Abertura"
-      className="relative isolate flex min-h-[100svh] w-full flex-col justify-between overflow-hidden bg-paragon-black text-paragon-white"
+      className="relative isolate flex min-h-[100dvh] w-full flex-col justify-between overflow-hidden bg-black text-white"
     >
-      {/* 1. Vídeo full-bleed contínuo de fundo (visível pelas letras vazadas no topo e no palco inferior) */}
+      {/* 1. VÍDEO CINEMATOGRÁFICO DE FUNDO (PORSCHE / HERO MEDIA) */}
       {media ? (
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
           <AutoVideo
             media={media}
             priority={true}
             sizes="100vw"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover opacity-80 scale-100 transition-transform duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/60" />
+          {/* Gradação cinematográfica equilibrada: contraste preciso mantendo visibilidade ampla da cena */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/80" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_25%,rgba(0,0,0,0.65)_100%)]" />
         </div>
       ) : (
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-paragon-black" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-zinc-950" />
       )}
 
-      {/* 2. Banner Superior Monumental estilo Paragon:
-             - Topo sólido #FFFFFF cobrindo a área atrás da navbar fixa
-             - Wordmark BARBAROTTI em knockout transparente recortado na base do banner */}
-      <div className="relative z-10 flex w-full flex-col overflow-hidden select-none h-[42vh] sm:h-[46vh] lg:h-[50vh]">
-        {/* Espaço branco flexível que garante a faixa branca limpa desde o topo até a base das letras */}
-        <div className="w-full flex-1 bg-paragon-white" />
-
-        {/* Wordmark Monumental BARBAROTTI vazado (4320x960 lossless WebP knockout) */}
-        <div className="relative w-[101vw] -left-[0.5vw] flex-none -mb-2 sm:-mb-3 lg:-mb-4 leading-none">
-          <h1 className="sr-only">Barbarotti — {tagline}</h1>
-          <Image
-            src="/barbarotti-banner.webp"
-            alt="BARBAROTTI"
-            width={4320}
-            height={960}
-            priority
-            fetchPriority="high"
-            className="block h-auto w-full object-contain pointer-events-none select-none"
-          />
-        </div>
+      {/* 2. BARRA SUPERIOR: LOCALIZAÇÃO */}
+      <div className="relative z-10 mx-auto w-full max-w-[1536px] px-6 sm:px-10 lg:px-14 xl:px-16 pt-24 sm:pt-32 lg:pt-36">
+        {location ? (
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[11px] sm:text-[12px] font-medium tracking-[0.2em] uppercase text-zinc-300 drop-shadow">
+              {location.replace(/^●?\s*REC:\s*/i, '').toUpperCase()}
+            </span>
+          </div>
+        ) : null}
       </div>
 
-      {/* 3. Rodapé Clean do Hero (Emblema à esquerda + Headline e Botão Laranja ao centro + Selo @soubarbarotti à direita) */}
-      <div className="paragon-container relative z-10 mt-auto flex flex-1 flex-col justify-end pt-12 pb-6 lg:pb-8">
-        <div className="grid grid-cols-1 items-end gap-6 lg:grid-cols-12">
-          {/* Canto Inferior Esquerdo: Símbolo / Emblema Clean do Barbarotti */}
-          <div className="order-2 hidden items-end lg:order-1 lg:col-span-3 lg:flex">
-            <div className="inline-flex flex-col items-center gap-1.5 text-paragon-white/90">
-              <div className="flex h-[32px] w-[64px] items-center justify-center rounded-full border border-paragon-white/80 bg-black/35 backdrop-blur-[2px]">
-                <BarbarottiSymbol className="size-4 text-paragon-blue" />
-              </div>
-              <span className="font-kicker text-[8.5px] tracking-[0.2em] text-paragon-white/80 uppercase">
-                DIREÇÃO &amp; IA
-              </span>
-            </div>
-          </div>
+      {/* 3. CENTRO MONUMENTAL: NOME GIGANTE ESTILO RUSHES ("BARBAROTTI.") */}
+      <div className="relative z-10 mx-auto my-auto flex w-full max-w-[1536px] flex-1 items-center justify-center px-4 sm:px-8 lg:px-12 py-4">
+        <h1 className="w-full text-center font-display text-[17vw] sm:text-[15.5vw] md:text-[14.5vw] lg:text-[14vw] xl:text-[13.5vw] font-black uppercase tracking-[-0.04em] leading-[0.82] select-none text-[#edebe6] drop-shadow-[0_12px_40px_rgba(0,0,0,0.7)]">
+          BARBAROTTI.
+        </h1>
+      </div>
 
-          {/* Centro: Frase de Impacto + Botão Retangular Laranja Barbarotti (#FF6A00) */}
-          <div className="order-1 flex flex-col items-center text-center lg:order-2 lg:col-span-6">
-            <ScrollReveal delay={50}>
-              <p className="font-display text-[clamp(1.65rem,2.5vw,2.5rem)] leading-[1.02] font-bold tracking-[0.015em] text-paragon-white uppercase drop-shadow-[0_2px_18px_rgba(0,0,0,0.7)]">
-                <SplitText text={headline.toUpperCase()} speed="fast" mode="words" delay={30} />
+      {/* 4. BLOCO INFERIOR: TAGLINE À ESQUERDA E DEMANDAS NUMERADAS À DIREITA */}
+      <div className="relative z-10 mx-auto w-full max-w-[1536px] px-6 sm:px-10 lg:px-14 xl:px-16 pb-8 sm:pb-12 lg:pb-14">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 sm:gap-10">
+          {/* Lado Esquerdo: Tagline do Barbarotti */}
+          <div className="max-w-sm sm:max-w-md lg:max-w-lg">
+            <ScrollReveal delay={100}>
+              <p className="font-sans text-[13px] sm:text-[14px] md:text-[15px] leading-relaxed text-zinc-300/90 font-light drop-shadow">
+                {tagline ? <SplitText text={tagline} speed="fast" mode="words" delay={80} /> : null}
               </p>
             </ScrollReveal>
-
-            <ScrollReveal delay={120} className="mt-4">
-              <Link href="/#trabalhos" className="u-button u-button--red">
-                <RollText text="Ver trabalhos selecionados" />
-              </Link>
-            </ScrollReveal>
           </div>
 
-          {/* Canto Inferior Direito: Emblema Assinatura em Pílula (idêntico ao canto inferior direito da Paragon) */}
-          <div className="order-3 flex items-end justify-between lg:col-span-3 lg:justify-end">
-            <div className="inline-flex items-center gap-2 lg:hidden">
-              <div className="flex h-[28px] w-[56px] items-center justify-center rounded-full border border-paragon-white/75 bg-black/30">
-                <BarbarottiSymbol className="size-3.5 text-paragon-blue" />
-              </div>
-              <span className="font-kicker text-[9px] tracking-[0.16em] text-paragon-white/75 uppercase">
-                DIREÇÃO &amp; IA
-              </span>
+          {/* Lado Direito: Demandas / Especialidades numeradas (01/, 02/, 03/...) */}
+          {list.length > 0 && (
+            <div className="md:text-right shrink-0">
+              <ScrollReveal delay={150}>
+                <ol
+                  aria-label="Demandas e especialidades"
+                  className="space-y-1 sm:space-y-1.5 font-display text-[12px] sm:text-[13px] md:text-[14px] font-medium tracking-wider uppercase text-white drop-shadow"
+                >
+                  {list.map((item, i) => (
+                    <li key={i} className="block text-zinc-200">
+                      <span className="font-mono text-zinc-400 font-normal mr-2">
+                        {String(i + 1).padStart(2, '0')}/
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ol>
+              </ScrollReveal>
             </div>
-
-            <a
-              href={settings.instagramUrl || 'https://www.instagram.com/soubarbarotti/'}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram @soubarbarotti"
-              className="group inline-flex flex-col items-end gap-1 text-paragon-white transition-opacity hover:opacity-90"
-            >
-              <span className="font-kicker text-[7.5px] tracking-[0.2em] text-paragon-white/75 uppercase">
-                CREATIVE DIRECTION
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-paragon-white/85 bg-black/35 px-4 py-1.5 backdrop-blur-[2px] transition-colors group-hover:border-paragon-blue">
-                <BarbarottiSymbol className="size-3.5 text-paragon-blue" />
-                <span className="font-display text-[17px] leading-none font-semibold tracking-tight text-paragon-white uppercase">
-                  Barbarotti
-                </span>
-              </span>
-            </a>
-          </div>
+          )}
         </div>
       </div>
     </section>

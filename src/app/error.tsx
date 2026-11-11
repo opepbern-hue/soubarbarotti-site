@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { RollText } from '@/components/site/Hud';
 
 export default function ErrorBoundary({
   error,
@@ -16,28 +15,38 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paragon-black px-[var(--site-margin)] text-paragon-white">
-      <div className="w-full max-w-lg border border-paragon-white/25 bg-paragon-black p-8 text-center lg:p-12">
-        <span className="inline-block border border-paragon-black bg-paragon-red px-3 py-1 font-kicker text-[12px] text-paragon-black uppercase">
-          ✦ ERRO DE EXECUÇÃO
-        </span>
+    <div className="min-h-screen bg-[#0a0705] text-[#f7efe6] flex items-center justify-center px-6 selection:bg-[#ff5500] selection:text-white">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#ff5500]/10 border border-[#ff5500]/30 text-[#ff5500] font-mono text-sm">
+          !
+        </div>
 
-        <h1 className="text-paragon-h2 mt-5 text-paragon-white">Instabilidade momentânea</h1>
-        <p className="text-paragon-body mt-3 text-paragon-grey-400">
-          O servidor está sincronizando os dados. Você pode recarregar a página ou voltar para a tela inicial.
-        </p>
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-display font-medium tracking-tight">
+            Instabilidade momentânea
+          </h1>
+          <p className="text-sm text-[#b8a898] leading-relaxed">
+            O servidor está sincronizando os dados. Você pode recarregar a página ou voltar para a tela inicial.
+          </p>
+        </div>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button type="button" onClick={() => reset()} className="u-button u-button--red w-full sm:w-auto">
-            <RollText text="Tentar novamente" />
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => reset()}
+            className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#ff5500] text-black font-medium text-xs tracking-wider uppercase hover:bg-[#ff6f26] transition-colors"
+          >
+            Tentar novamente
           </button>
-          <Link href="/" className="u-button u-button--dark w-full sm:w-auto">
-            <RollText text="Ir para a home" />
+          <Link
+            href="/"
+            className="w-full sm:w-auto px-6 py-3 rounded-full border border-white/10 text-xs tracking-wider uppercase hover:bg-white/5 transition-colors"
+          >
+            Ir para a home
           </Link>
         </div>
 
         {error.digest ? (
-          <p className="mt-6 font-kicker text-[11px] text-paragon-grey-500 uppercase">
+          <p className="text-[11px] font-mono text-white/30 pt-4">
             Código do evento: {error.digest}
           </p>
         ) : null}
