@@ -149,6 +149,34 @@ const ATIV1_PHOTOS: ActivityPhoto[] = [
   },
 ];
 
+const ATIV3_PHOTOS: ActivityPhoto[] = [
+  {
+    file: 'tercos', title: 'Regra dos terços', src: '/ifsc/ativ3/tercos.jpg', approved: true,
+    alt: 'Fachada de loja iluminada à noite com placa de 20 km/h num poste à esquerda do quadro',
+    comment: 'O poste com a placa de 20 km/h fica na linha do terço esquerdo, e não no meio. Assim o olho passa pela placa e segue para a vitrine iluminada.',
+  },
+  {
+    file: 'simetria', title: 'Simetria', src: '/ifsc/ativ3/simetria.jpg', approved: true,
+    alt: 'Bolo redondo com furo no meio, visto de cima dentro da forma preta, sobre uma tábua de madeira',
+    comment: 'Vista de cima, a forma redonda e o furo no centro dividem o bolo em lados iguais. A simetria deixa a foto calma e fácil de ler.',
+  },
+  {
+    file: 'cor', title: 'Contraste de cor', src: '/ifsc/ativ3/cor.jpg', approved: true,
+    alt: 'Barraca de festa junina com bandeirinhas coloridas e cercado amarelo sobre chão de cascalho cinza',
+    comment: 'As bandeirinhas e o amarelo da barraca brilham contra o cinza do cascalho e do céu nublado. A cor viva puxa o olhar direto para a festa.',
+  },
+  {
+    file: 'luz', title: 'Contraste de luz', src: '/ifsc/ativ3/luz.jpg', approved: true, favorite: true,
+    alt: 'Praça à noite com postes acesos, árvores iluminadas por baixo e piso de pedra',
+    comment: 'Favorita. Os postes e as árvores acesas recortam a escuridão da praça, e o piso de pedra reflete a luz. O claro contra o escuro cria clima e profundidade.',
+  },
+  {
+    file: 'linhas', title: 'Linhas-guia', src: '/ifsc/ativ3/linhas.jpg', approved: true,
+    alt: 'Placa azul de rua com a palavra Shopping e uma seta branca, em diagonal sobre fundo escuro de folhagem',
+    comment: 'A diagonal da placa e a seta conduzem o olhar de um lado ao outro do quadro. É a própria placa dizendo para onde olhar.',
+  },
+];
+
 const ATIV2_PHOTOS: ActivityPhoto[] = [
   {
     file: 'ativ2-1', title: 'Guarda-sóis', src: '/ifsc/ativ2/foto-1.jpg', approved: true, favorite: true,
@@ -202,10 +230,14 @@ export const ACTIVITIES_DATA: ActivityCardData[] = [
     n: 3,
     title: 'Por aí',
     theme: '5 regras de composição',
-    status: 'pendente',
+    status: 'concluido',
     shortDescription: 'Uma foto para cada regra: terços, simetria, contraste de cor, contraste de luz e linhas-guia.',
-    details: [{ label: 'Pedido', text: '5 fotos (1 por regra) + favorita e a que menos gostou, com justificativa.' }],
-    missing: ['5 fotos (1 por regra) com legenda', 'favorita', 'a que menos gostou'],
+    details: [
+      { label: 'Pedido', text: '5 fotos (1 por regra) + favorita e a que menos gostou, com justificativa.' },
+      { label: 'Favorita', text: 'Contraste de luz: a praça à noite tem clima, profundidade e reflexo no piso.' },
+      { label: 'Menos gostou', text: 'Simetria: o bolo cumpre a regra, mas o papel-alumínio no canto pesa e tira a limpeza da foto.' },
+    ],
+    photos: ATIV3_PHOTOS,
   },
   {
     id: 'ativ-4',
